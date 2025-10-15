@@ -1,4 +1,4 @@
-package com.ms.login.infrastructure.config;
+package com.ms.login.infrastructure.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,24 +8,36 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtAuthenticationFilter jwtFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
+    }
+
     //Responsavel por toda o controle do endpoints publicos e privados
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests(authorizedConfig -> {
+        return http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(authorizedConfig -> {
             authorizedConfig.requestMatchers("/public").permitAll();
             authorizedConfig.requestMatchers("/swagger-ui**").permitAll();
             authorizedConfig.requestMatchers("/logout").permitAll();
             authorizedConfig.anyRequest().authenticated();
         })
-                .formLogin(form -> form.loginPage("/login").permitAll())
-                .oauth2Login(Customizer.withDefaults())
-                .logout(logout -> logout.permitAll())
+                //TODO: aJUSTAR O SECURITY CONFIG PARA TER SUPORTE PARA OAUTH E JWT NORMAL
+//                .formLogin(form -> form.loginPage("/login").permitAll())
+//                .oauth2Login(Customizer.withDefaults())
+//                .logout(logout -> logout.permitAll())
+
 //        .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
     }
 

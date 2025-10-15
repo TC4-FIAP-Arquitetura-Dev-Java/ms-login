@@ -1,5 +1,6 @@
-package com.ms.login.infrastructure.config;
+package com.ms.login.infrastructure.config.security;
 
+import com.ms.login.entrypoint.controllers.client.dto.UserResponse;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -15,6 +16,9 @@ public class CustomUserDetails implements UserDetails{
     private String email;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
+
+    public CustomUserDetails(UserResponse usuario) {
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

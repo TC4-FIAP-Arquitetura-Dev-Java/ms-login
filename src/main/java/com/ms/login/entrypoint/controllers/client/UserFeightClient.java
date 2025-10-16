@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "usuario-service", url = "${MS-USUARIO_ENDPOINT}")
+@FeignClient(name = "usuario-service", url = "${usuario.service.url}")
 public interface UserFeightClient {
 
     //Como estou pegando dados de outros ms devo fornecer todos os dtos necessarios para usar os dados da forma correta

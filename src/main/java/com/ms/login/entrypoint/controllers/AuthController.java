@@ -5,21 +5,17 @@ import com.ms.login.entrypoint.controllers.dto.LoginResponse;
 import com.ms.login.infrastructure.config.security.*;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.Date;
 
 
 @RestController
-@RequestMapping("/v1/auth")
+@RequestMapping("/v1")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -35,6 +31,11 @@ public class AuthController {
         this.securityAuditLogger = securityAuditLogger;
         this.rateLimitingFilter = rateLimitingFilter;
         this.jwtTokenProvider = jwtTokenProvider;
+    }
+
+    @GetMapping("/public")
+    public String teste(){
+        return "AAAAAAAAAAAAAAAAAAAAAa funcionou";
     }
 
     @PostMapping("/login")
@@ -56,8 +57,8 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
 
             //Objeto de usuario autenticado
-            CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-            String token = jwtTokenProvider.generateToken(customUserDetails);
+            MyUserDetails myUserDetails = (MyUserDetails) authentication.getPrincipal();
+            String token = jwtTokenProvider.generateToken(myUserDetails);
 
             Claims claims = jwtTokenProvider.extractClaims(token);
             Date expiresAt = jwtTokenProvider.extractExpirationDate(claims);

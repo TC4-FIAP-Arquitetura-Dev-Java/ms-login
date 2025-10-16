@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-public class CustomUserDetails implements UserDetails{
+public class MyUserDetails implements UserDetails{
 
     //Classe responsavel por estruturar o objeto usuario para ser utilizado na autenticacao
 
@@ -17,7 +17,7 @@ public class CustomUserDetails implements UserDetails{
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
-    public CustomUserDetails(UserResponse usuario) {
+    public MyUserDetails(UserResponse usuario) {
     }
 
     @Override

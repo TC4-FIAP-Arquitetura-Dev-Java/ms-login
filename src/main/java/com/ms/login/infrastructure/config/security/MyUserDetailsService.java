@@ -8,11 +8,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CustomUserDetailsService implements UserDetailsService {
+public class MyUserDetailsService implements UserDetailsService {
 
     private final UserClient usuarioClient;
 
-    public CustomUserDetailsService(UserClient usuarioClient) {
+    public MyUserDetailsService(UserClient usuarioClient) {
         this.usuarioClient = usuarioClient;
     }
 
@@ -25,7 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             if(usuario == null){
                 throw new UsernameNotFoundException("Usuário não encontrado");
             }
-            return new CustomUserDetails(usuario);
+            return new MyUserDetails(usuario);
         }catch (Exception e){
             throw new UsernameNotFoundException("Erro ao buscar usuario via Feign: " + e.getMessage());
         }

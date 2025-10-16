@@ -52,7 +52,7 @@ public class AuthController {
         }
 
         try{
-            //Realiza a autenticação
+            //Realiza a autenticação - De foma automatica ele acessa o MyUserDetailsService -> loadUserByUsername -> verificando a existencia para assim continuar com o autenticação
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
 

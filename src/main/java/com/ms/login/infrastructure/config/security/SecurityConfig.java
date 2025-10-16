@@ -2,11 +2,13 @@ package com.ms.login.infrastructure.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -16,69 +18,82 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtFilter;
-    private final CustomOAuth2SuccessHandler oAuth2SuccessHandler;
-    private final AuthenticationEntryPoint authenticationEntryPoint;
-    private final AccessDeniedHandler accessDeniedHandler;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitingFilter rateLimitingFilter;
+    private final SecurityHeadersFilter securityHeadersFilter;
 
-    public SecurityConfig(
-            JwtAuthenticationFilter jwtFilter,
-            CustomOAuth2SuccessHandler oAuth2SuccessHandler,
-            AuthenticationEntryPoint authenticationEntryPoint,
-            AccessDeniedHandler accessDeniedHandler
-    ) {
-        this.jwtFilter = jwtFilter;
-        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
-        this.authenticationEntryPoint = authenticationEntryPoint;
-        this.accessDeniedHandler = accessDeniedHandler;
+//    private final CustomOAuth2SuccessHandler oAuth2SuccessHandler;
+//    private final AuthenticationEntryPoint authenticationEntryPoint;
+//    private final AccessDeniedHandler accessDeniedHandler;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                          RateLimitingFilter rateLimitingFilter,
+                          SecurityHeadersFilter securityHeadersFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.rateLimitingFilter = rateLimitingFilter;
+        this.securityHeadersFilter = securityHeadersFilter;
     }
 
-//    Responsavel por toda o controle do endpoints publicos e privados
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           AuthenticationEntryPoint authenticationEntryPoint,
+                                           AccessDeniedHandler accessDeniedHandler
+    ) throws Exception {
+
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/v1/login",
-                                "/v1/public",
+                        // Endpoints públicos
+                        .requestMatchers("/v1/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/users").permitAll()
+                        .requestMatchers("/v1/auth/refresh").permitAll()
+                        .requestMatchers("/h2-console/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
-                                "/v1/auth/login/oauth2/**",
-                                "/v1/auth/logout",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/error"
-                        ).permitAll()
+                        // Endpoints de logout requerem autenticação
+                        .requestMatchers("/v1/auth/logout").authenticated()
                         .anyRequest().authenticated()
                 )
-
-//                 login tradicional (username/password)
-                .formLogin(form -> form
-                        .loginPage("/v1/login")
-                        .usernameParameter("username")
-                        .passwordParameter("password")
-                        .defaultSuccessUrl("/home", true)
-                        .failureUrl("/v1/login?error=true")
-                        .permitAll()
-                )
-                // login via Google
-                .oauth2Login(oauth -> oauth
-                        .loginPage("/v1/auth/login/oauth2")
-                        .successHandler(oAuth2SuccessHandler) // gera o JWT
-                        .failureUrl("/v1/auth/login?error=oauth")
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/v1/auth/logout")
-                        .logoutSuccessUrl("/v1/auth/login?logout=true")
-                        .permitAll()
-                )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                //Caso de falha - retorna um handler exception
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false))
+                .addFilterBefore(securityHeadersFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
                 );
 
         return http.build();
+
+//                 login tradicional (username/password)
+//                .formLogin(form -> form
+//                        .loginPage("/v1/login")
+//                        .usernameParameter("username")
+//                        .passwordParameter("password")
+//                        .defaultSuccessUrl("/home", true)
+//                        .failureUrl("/v1/login?error=true")
+//                        .permitAll()
+//                )
+//                // login via Google
+//                .oauth2Login(oauth -> oauth
+//                        .loginPage("/v1/auth/login/oauth2")
+//                        .successHandler(oAuth2SuccessHandler) // gera o JWT
+//                        .failureUrl("/v1/auth/login?error=oauth")
+//                )
+//                .logout(logout -> logout
+//                        .logoutUrl("/v1/auth/logout")
+//                        .logoutSuccessUrl("/v1/auth/login?logout=true")
+//                        .permitAll()
+//                )
+//                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+//                //Caso de falha - retorna um handler exception
+//                .exceptionHandling(ex -> ex
+//                        .authenticationEntryPoint(authenticationEntryPoint)
+//                        .accessDeniedHandler(accessDeniedHandler)
+//                );
+//
+//        return http.build();
     }
 
     //Responsavel por toda a autenticacao(ele decide ser o login e valido ou não)

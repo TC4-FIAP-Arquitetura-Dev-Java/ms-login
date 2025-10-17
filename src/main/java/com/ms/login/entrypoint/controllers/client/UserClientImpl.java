@@ -16,11 +16,11 @@ public class UserClientImpl implements UserClient {
 
     @Override
     public UserResponse loadUserByUsername(String username) {
-        return null;
+        return userFeightClient.loadUserByUsername(username);
     }
 
     @Override
     public UserResponse createUser(UserRequest request) {
-        return null;
+        return userFeightClient.createUser(request);
     }
 }

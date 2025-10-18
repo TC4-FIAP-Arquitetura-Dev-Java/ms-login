@@ -1,10 +1,13 @@
 package com.ms.login.entrypoint.controllers;
 
-import com.ms.login.entrypoint.controllers.dto.LoginRequestDTO;
-import com.ms.login.entrypoint.controllers.dto.LoginResponse;
+import com.ms.login.application.gateway.UserClient;
 import com.ms.login.infrastructure.config.security.*;
+import com.ms.loginDomain.LoginApi;
+import com.ms.loginDomain.gen.model.LoginRequestDto;
+import com.ms.loginDomain.gen.model.LoginResponseDto;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,37 +19,35 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/v1")
-public class AuthController {
+public class AuthController implements LoginApi {
 
     private final AuthenticationManager authenticationManager;
     private final SecurityAuditLogger  securityAuditLogger;
     private final RateLimitingFilter  rateLimitingFilter;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserClient userClient;
 
     public AuthController(AuthenticationManager authenticationManager,
                           SecurityAuditLogger securityAuditLogger,
                           RateLimitingFilter rateLimitingFilter,
-                          JwtTokenProvider jwtTokenProvider) {
+                          JwtTokenProvider jwtTokenProvider,
+                          UserClient userClient) {
         this.authenticationManager = authenticationManager;
         this.securityAuditLogger = securityAuditLogger;
         this.rateLimitingFilter = rateLimitingFilter;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.userClient = userClient;
     }
 
-    @GetMapping("/public")
-    public String teste(){
-        return "AAAAAAAAAAAAAAAAAAAAAa funcionou";
-    }
-
-    @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequestDTO loginRequest, HttpServletRequest request) {
-        String clientIp = getClientIpAddress(request);
+    @Override
+    public ResponseEntity<LoginResponseDto> _login(LoginRequestDto loginRequest) {
+        String clientIp = getClientIpAddress(null);
 
         //Validação de segurança antes da realização da autenticação
-        if(InputValidationFilter.containsMaliciousContent(loginRequest.username()) ||
-                InputValidationFilter.containsMaliciousContent(loginRequest.password())){
+        if(InputValidationFilter.containsMaliciousContent(loginRequest.getUsername()) ||
+                InputValidationFilter.containsMaliciousContent(loginRequest.getPassword())){
 
-            securityAuditLogger.logSuspiciousActivity(loginRequest.username(), clientIp,
+            securityAuditLogger.logSuspiciousActivity(loginRequest.getUsername(), clientIp,
                     "MALICIOUS_INPUT", "Attempted login with malicious input");
             throw new BadCredentialsException("Invalid credentials");
         }
@@ -54,7 +55,7 @@ public class AuthController {
         try{
             //Realiza a autenticação - De foma automatica ele acessa o MyUserDetailsService -> loadUserByUsername -> verificando a existencia para assim continuar com o autenticação
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
             //Objeto de usuario autenticado
             MyUserDetails myUserDetails = (MyUserDetails) authentication.getPrincipal();
@@ -65,19 +66,25 @@ public class AuthController {
             String userId = jwtTokenProvider.extractUserId(claims);
 
             //Log de Sucesso
-            securityAuditLogger.logLoginAttempt(loginRequest.username(), clientIp, true, "SUCCESS");
+            securityAuditLogger.logLoginAttempt(loginRequest.getUsername(), clientIp, true, "SUCCESS");
 
             //Limpa as tentativas que não deram certo
             rateLimitingFilter.clearAttempts(clientIp);
-            return new LoginResponse(token, authentication.getName(), expiresAt.toString(), userId);
+
+            LoginResponseDto responseDto = new LoginResponseDto();
+            responseDto.setToken(token);
+            responseDto.setUsername(authentication.getName());
+            responseDto.setExpiresAt(expiresAt.toString());
+            responseDto.setUserId(userId);
+            return ResponseEntity.ok(responseDto);
 
         }catch (BadCredentialsException e) {
             // Log de falha
-            securityAuditLogger.logLoginAttempt(loginRequest.username(), clientIp, false, "INVALID_CREDENTIALS");
+            securityAuditLogger.logLoginAttempt(loginRequest.getUsername(), clientIp, false, "INVALID_CREDENTIALS");
             rateLimitingFilter.recordFailedAttempt(clientIp);
             throw e;
         } catch (Exception e) {
-            securityAuditLogger.logLoginAttempt(loginRequest.username(), clientIp, false, "SYSTEM_ERROR");
+            securityAuditLogger.logLoginAttempt(loginRequest.getUsername(), clientIp, false, "SYSTEM_ERROR");
             throw new BadCredentialsException("Authentication failed");
         }
     }

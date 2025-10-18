@@ -1,0 +1,122 @@
+openapi: 3.0.3
+info:
+  title: API de Login
+  description: API para autenticação de usuários via Spring Security.
+  version: 1.0.0
+
+tags:
+  - name: Login
+    description: Operações relacionadas à autenticação de login.
+
+paths:
+  /login:
+    post:
+      summary: Realiza login de usuário
+      operationId: login
+      tags:
+        - Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login realizado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: jdoe
+        password:
+          type: string
+          format: password
+          example: $enh@2025
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token JWT gerado após login
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        username:
+          type: string
+          example: jdoe
+        expiresAt:
+          type: string
+          format: string
+          description: Data e hora de expiração do token
+          example: 2025-10-17T23:59:59Z
+        userId:
+          type: string
+          example: 652ff3a9b1c2d40012ab45de
+
+    ApiError:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          type: string
+          example: Parâmetros inválidos.
+        path:
+          type: string
+          example: /login
+        timestamp:
+          type: string
+          format: date-time
+          example: 2025-10-11T10:30:00Z
+
+  responses:
+    BadRequest:
+      description: Requisição inválida.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    Unauthorized:
+      description: Falha de autenticação.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    Forbidden:
+      description: Acesso negado.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    InternalError:
+      description: Erro interno do servidor.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'

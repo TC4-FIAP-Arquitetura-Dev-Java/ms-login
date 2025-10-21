@@ -5,6 +5,7 @@ import com.ms.login.entrypoint.controllers.client.dto.UserResponse;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
+@Deprecated
 public interface UserClient {
 
     UserResponse loadUserByUsername(@PathVariable String username);

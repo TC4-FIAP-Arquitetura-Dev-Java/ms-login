@@ -8,11 +8,14 @@ import java.util.Optional;
 
 public interface LoginGateway {
 
-    Optional<LoginDomain> register(LoginDomain loginDomain);
+    void register(LoginDomain loginDomain);
 
-    AuthTokenDomain authenticate(CredentialDomain credentials);
+//    Optional<LoginDomain> authenticate(CredentialDomain credentials);
+//
+//    AuthTokenDomain refreshToken(String refreshToken);
+//
+//    void invalidateTokens(String userId);
 
-    AuthTokenDomain refreshToken(String refreshToken);
-
-    void invalidateTokens(String userId);
+    //Manter temporariamente ate definir a   estrutura
+    Optional<LoginDomain> getUsername(String username);
 }

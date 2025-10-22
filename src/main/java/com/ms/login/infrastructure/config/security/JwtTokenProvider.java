@@ -16,37 +16,67 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private static final String SECRET_KEY = "";
-    private static final long EXPIRATION_TIME = 1000 * 60 * 60; //1 hora
+    private final String ACCESS_TOKEN_SECRET = System.getenv("ACCESS_TOKEN_SECRET");
+    private final String REFRESH_TOKEN_SECRET = System.getenv("REFRESH_TOKEN_SECRET");
+
+    private final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60; // 1 hora
+    private final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 dias
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes(StandardCharsets.UTF_8));
     }
 
-    //Gera o token para o usuario, isso é somente se o usuario realmente tiver dentro do banco de dados e credenciais corretas
-    public String generateToken(UserDetails userDetails) {
-        Date now = new Date();
-        Date expiration = new Date(now.getTime() + EXPIRATION_TIME);
-
+    public String generateAccessToken(String username) {
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(now)
-                .setExpiration(expiration)
-                .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()), SignatureAlgorithm.ES256)
+                .setSubject(username)
+                .claim("token_type", "access")
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+                .signWith(SignatureAlgorithm.HS512, ACCESS_TOKEN_SECRET)
                 .compact();
+    }
+
+    public String generateRefreshToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("token_type", "refresh")
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
+                .signWith(SignatureAlgorithm.HS512, REFRESH_TOKEN_SECRET)
+                .compact();
+    }
+
+    public boolean isValidAcessToken(String token) {
+        return isValid(token, ACCESS_TOKEN_SECRET, "access");
+    }
+
+    public boolean isValidRefleshToken(String token){
+        return isValid(token, REFRESH_TOKEN_SECRET, "refresh");
+    }
+
+    private boolean isValid(String token, String secret, String expectedType){
+        try{
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return expectedType.equals(claims.get("token_type"));
+        }catch (JwtException e){
+            return false;
+        }
     }
 
     public String getUsernameFromToken(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
+                .setSigningKey(Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes()))
                 .build()
-                .parseClaimsJws(token).getBody().getSubject();
+                .parseClaimsJws(token)
+                .getBody().getSubject();
     }
 
     public boolean validateToken(String token) {
         try{
             Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
+                    .setSigningKey(Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes()))
                     .build()
                     .parseClaimsJws(token);
             return true;

@@ -1,30 +1,48 @@
 package com.ms.login.domain.model;
 
-import java.time.Instant;
-
 public class AuthTokenDomain {
 
-    private String accessToken;
-    private String refreshToken;
-    private Instant expiresAt;
+    private String token;
+    private String username;
+    private String expiresAt;
+    private String userId;
 
-    public AuthTokenDomain(String accessToken, String refreshToken, Instant expiresAt) {
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
+    public AuthTokenDomain(String token, String username, String expiresAt, String userId) {
+        this.token = token;
+        this.username = username;
+        this.expiresAt = expiresAt;
+        this.userId = userId;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(String expiresAt) {
         this.expiresAt = expiresAt;
     }
 
-    public AuthTokenDomain() {}
-
-    public String getAccessToken() {
-        return accessToken;
+    public String getUserId() {
+        return userId;
     }
 
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public Instant getExpiresAt() {
-        return expiresAt;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

@@ -1,31 +1,45 @@
 package com.ms.login.infrastructure.config.database.implementations;
 
 import com.ms.login.application.gateway.LoginGateway;
-import com.ms.login.domain.model.AuthTokenDomain;
-import com.ms.login.domain.model.CredentialDomain;
 import com.ms.login.domain.model.LoginDomain;
+import com.ms.login.infrastructure.config.database.entities.LoginDocument;
+import com.ms.login.infrastructure.config.database.mappers.LoginDocumentMapper;
+import com.ms.login.infrastructure.config.database.repositories.LoginRepository;
 
 import java.util.Optional;
 
 public class LoginGatewayImpl implements LoginGateway {
 
+    private final LoginRepository loginRepository;
+
+    public LoginGatewayImpl(LoginRepository loginRepository) {
+        this.loginRepository = loginRepository;
+    }
+
     @Override
-    public Optional<LoginDomain> register(LoginDomain loginDomain) {
+    public void register(LoginDomain loginDomain) {
+        LoginDocument loginDocument = LoginDocumentMapper.INSTANCE.toDocument(loginDomain);
+        loginRepository.save(loginDocument);
+    }
+
+//    @Override
+//    public Optional<LoginDomain> authenticate(CredentialDomain credentials) {
+//        Optional<LoginDocument> document = loginRepository.findById(credentials.getUsername());
+//        LoginDomain loginDomain = LoginDocumentMapper.INSTANCE.toDomain(document.get());
+//        return Optional.of(loginDomain);
+//    }
+//
+//    @Override
+//    public AuthTokenDomain refreshToken(String refreshToken) {
+//        return null;
+//    }
+
+//    @Override
+//    public void invalidateTokens(String userId) {}
+
+
+    @Override
+    public Optional<LoginDomain> getUsername(String username) {
         return Optional.empty();
-    }
-
-    @Override
-    public AuthTokenDomain authenticate(CredentialDomain credentials) {
-        return null;
-    }
-
-    @Override
-    public AuthTokenDomain refreshToken(String refreshToken) {
-        return null;
-    }
-
-    @Override
-    public void invalidateTokens(String userId) {
-
     }
 }

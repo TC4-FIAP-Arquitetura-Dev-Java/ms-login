@@ -1,25 +1,47 @@
 package com.ms.login.domain.model;
 
+
 public class AuthTokenDomain {
 
-    private String token;
+    private String accessToken;
+    private String refreshToken;
     private String username;
+    private String role;
     private String expiresAt;
     private String userId;
 
-    public AuthTokenDomain(String token, String username, String expiresAt, String userId) {
-        this.token = token;
+    public AuthTokenDomain(String accessToken, String username, String role, String userId, String expiresAt) {
+        this.accessToken = accessToken;
         this.username = username;
-        this.expiresAt = expiresAt;
+        this.role = role;
         this.userId = userId;
+        this.expiresAt = expiresAt;
     }
 
-    public String getToken() {
-        return token;
+    // Construtor para login + refresh token (quando houver)
+    public AuthTokenDomain(String accessToken, String refreshToken, String username, String role, String userId, String expiresAt) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.username = username;
+        this.role = role;
+        this.userId = userId;
+        this.expiresAt = expiresAt;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     public String getUsername() {
@@ -28,6 +50,14 @@ public class AuthTokenDomain {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String getExpiresAt() {

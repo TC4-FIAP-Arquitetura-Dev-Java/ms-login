@@ -1,5 +1,6 @@
 package com.ms.login.domain.model;
 
+@Deprecated
 public class CredentialDomain {
 
     private String username;

@@ -1,7 +1,7 @@
 package com.ms.login.infrastructure.config.security;
 
-import com.ms.login.application.gateway.UserClient;
-import com.ms.login.entrypoint.controllers.client.dto.UserResponse;
+import com.ms.login.infrastructure.config.database.entities.LoginDocument;
+import com.ms.login.infrastructure.config.database.repositories.LoginRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,24 +10,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class MyUserDetailsService implements UserDetailsService {
 
-    private final UserClient usuarioClient;
+    private final LoginRepository loginRepository;
 
-    public MyUserDetailsService(UserClient usuarioClient) {
-        this.usuarioClient = usuarioClient;
+    public MyUserDetailsService(LoginRepository loginRepository) {
+        this.loginRepository = loginRepository;
     }
 
-    //Busca o usuario e mosta o CustomUserDetails para ser utilizado dentro do autenticationManager
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try{
-            UserResponse usuario = usuarioClient.loadUserByUsername(username);
+            LoginDocument login = loginRepository.findByUsername(username);
 
-            if(usuario == null){
+            if(login == null){
                 throw new UsernameNotFoundException("Usuário não encontrado");
             }
-            return new MyUserDetails(usuario);
+
+            return new MyUserDetails(login);
         }catch (Exception e){
-            throw new UsernameNotFoundException("Erro ao buscar usuario via Feign: " + e.getMessage());
+            throw new UsernameNotFoundException("Erro ao buscar credenciais " + e.getMessage());
         }
     }
 }

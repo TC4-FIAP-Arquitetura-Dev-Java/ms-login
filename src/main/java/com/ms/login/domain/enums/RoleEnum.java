@@ -1,7 +1,8 @@
 package com.ms.login.domain.enums;
 
 public enum RoleEnum {
-    ADMIN;
+    ADMIN,
+    USER;
 
     public String toAuthority() {
         return "ROLE_" + this.name();

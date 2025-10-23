@@ -41,7 +41,7 @@ public class RefleshTokenUseCaseImpl implements RefreshTokenUseCase {
 
             Claims newClaims = jwtTokenProvider.extractClaims(newRefreshToken);
             Date expiresAt = jwtTokenProvider.extractExpirationDate(newClaims);
-            return new AuthTokenDomain(newAcessToken, username, expiresAt.toString(), userId);
+            return new AuthTokenDomain(newAcessToken, newRefreshToken, username, expiresAt.toString(), userId);
         }catch (ExpiredJwtException e){
             throw new BadCredentialsException("Expired refresh token");
         }catch (Exception e) {

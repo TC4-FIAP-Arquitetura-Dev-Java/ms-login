@@ -1,5 +1,6 @@
 package com.ms.login.infrastructure.config.security;
 
+import com.ms.login.domain.enums.RoleEnum;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import io.jsonwebtoken.Claims;
@@ -91,6 +92,11 @@ public class JwtTokenProvider {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public RoleEnum extractRole(Claims claims) {
+        String roleStr = claims.get("role", String.class);
+        return RoleEnum.valueOf(roleStr);
     }
 
     public String extractUsername(Claims claims) {

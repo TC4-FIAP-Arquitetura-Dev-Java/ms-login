@@ -1,28 +1,33 @@
 package com.ms.login.infrastructure.config.security;
 
-import com.ms.login.entrypoint.controllers.client.dto.UserResponse;
+import com.ms.login.domain.enums.RoleEnum;
+import com.ms.login.infrastructure.config.database.entities.LoginDocument;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
 
-public class MyUserDetails implements UserDetails{
+public class MyUserDetails implements UserDetails {
 
-    //Classe responsavel por estruturar o objeto usuario para ser utilizado na autenticacao
+    private final String userId;
+    private final String username;
+    private final String password;
+    private final RoleEnum roleEnum;
 
-    private String id;
-    private String usuario;
-    private String nome;
-    private String email;
-    private String password;
-    private Collection<? extends GrantedAuthority> authorities;
+    private final Collection<? extends GrantedAuthority> authorities;
 
-    public MyUserDetails(UserResponse usuario) {
-    }
+    public MyUserDetails(LoginDocument usuario) {
+        this.userId = usuario.getUserId();
+        this.username = usuario.getUsername();
+        this.password = usuario.getPassword();
+        this.roleEnum = usuario.getRoleEnum();
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        // Cria a autoridade com base no enum (ex: ROLE_ADMIN, ROLE_USER)
+        this.authorities = Collections.singletonList(
+                new SimpleGrantedAuthority("ROLE_" + roleEnum.name())
+        );
     }
 
     @Override
@@ -32,6 +37,15 @@ public class MyUserDetails implements UserDetails{
 
     @Override
     public String getUsername() {
-        return usuario;
+        return username;
+    }
+
+    public RoleEnum getRoleEnum() {
+        return roleEnum;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
     }
 }

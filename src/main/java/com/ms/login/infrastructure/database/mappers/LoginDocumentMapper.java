@@ -1,7 +1,7 @@
-package com.ms.login.infrastructure.config.database.mappers;
+package com.ms.login.infrastructure.database.mappers;
 
 import com.ms.login.domain.model.LoginDomain;
-import com.ms.login.infrastructure.config.database.entities.LoginDocument;
+import com.ms.login.infrastructure.database.entities.LoginDocument;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;

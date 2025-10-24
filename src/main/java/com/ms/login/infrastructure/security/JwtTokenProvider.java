@@ -1,4 +1,4 @@
-package com.ms.login.infrastructure.config.security;
+package com.ms.login.infrastructure.security;
 
 import com.ms.login.domain.enums.RoleEnum;
 import org.springframework.security.core.userdetails.UserDetails;

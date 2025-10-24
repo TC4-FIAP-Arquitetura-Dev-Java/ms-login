@@ -3,7 +3,7 @@ package com.ms.login.application.usecase.implementation;
 import com.ms.login.application.gateway.LoginGateway;
 import com.ms.login.application.usecase.RefreshTokenUseCase;
 import com.ms.login.domain.model.AuthTokenDomain;
-import com.ms.login.infrastructure.config.security.JwtTokenProvider;
+import com.ms.login.infrastructure.security.JwtTokenProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.security.authentication.BadCredentialsException;

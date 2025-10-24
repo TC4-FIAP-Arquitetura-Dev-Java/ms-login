@@ -1,9 +1,11 @@
-package com.ms.login.infrastructure.config.security;
+package com.ms.login.infrastructure.security;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+@Service
 public class ClientIpResolver {
 
     public String resolve() {

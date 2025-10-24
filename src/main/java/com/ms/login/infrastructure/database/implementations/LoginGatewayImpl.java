@@ -1,10 +1,10 @@
-package com.ms.login.infrastructure.config.database.implementations;
+package com.ms.login.infrastructure.database.implementations;
 
 import com.ms.login.application.gateway.LoginGateway;
 import com.ms.login.domain.model.LoginDomain;
-import com.ms.login.infrastructure.config.database.entities.LoginDocument;
-import com.ms.login.infrastructure.config.database.mappers.LoginDocumentMapper;
-import com.ms.login.infrastructure.config.database.repositories.LoginRepository;
+import com.ms.login.infrastructure.database.entities.LoginDocument;
+import com.ms.login.infrastructure.database.mappers.LoginDocumentMapper;
+import com.ms.login.infrastructure.database.repositories.LoginRepository;
 
 import java.util.Optional;
 

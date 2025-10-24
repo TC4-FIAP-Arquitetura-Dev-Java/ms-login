@@ -1,4 +1,4 @@
-package com.ms.login.infrastructure.config.database.entities;
+package com.ms.login.infrastructure.database.entities;
 
 import com.ms.login.domain.enums.RoleEnum;
 import org.springframework.data.annotation.CreatedDate;

@@ -1,7 +1,7 @@
-package com.ms.login.infrastructure.config.security;
+package com.ms.login.infrastructure.security;
 
 import com.ms.login.domain.enums.RoleEnum;
-import com.ms.login.infrastructure.config.database.entities.LoginDocument;
+import com.ms.login.infrastructure.database.entities.LoginDocument;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

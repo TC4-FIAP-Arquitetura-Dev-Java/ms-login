@@ -1,11 +1,8 @@
 package com.ms.login.application.usecase.implementation;
 
 import com.ms.login.application.usecase.LogoutUseCase;
-import com.ms.login.infrastructure.config.security.JwtTokenProvider;
-import io.jsonwebtoken.Claims;
+import com.ms.login.infrastructure.security.JwtTokenProvider;
 import org.springframework.security.authentication.BadCredentialsException;
-
-import java.util.Date;
 
 public class LogoutUseCaseImpl implements LogoutUseCase {
 

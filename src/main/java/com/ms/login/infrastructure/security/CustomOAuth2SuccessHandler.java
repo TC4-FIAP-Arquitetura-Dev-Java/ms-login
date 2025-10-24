@@ -1,4 +1,4 @@
-package com.ms.login.infrastructure.config.security;
+package com.ms.login.infrastructure.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,9 +1,8 @@
 package com.ms.login.application.usecase.implementation;
 
 import com.ms.login.application.usecase.LoginUseCase;
-import com.ms.login.domain.enums.RoleEnum;
 import com.ms.login.domain.model.AuthTokenDomain;
-import com.ms.login.infrastructure.config.security.*;
+import com.ms.login.infrastructure.security.*;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;

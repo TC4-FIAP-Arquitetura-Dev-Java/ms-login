@@ -1,7 +1,7 @@
-package com.ms.login.infrastructure.config.security;
+package com.ms.login.infrastructure.security;
 
-import com.ms.login.infrastructure.config.database.entities.LoginDocument;
-import com.ms.login.infrastructure.config.database.repositories.LoginRepository;
+import com.ms.login.infrastructure.database.entities.LoginDocument;
+import com.ms.login.infrastructure.database.repositories.LoginRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

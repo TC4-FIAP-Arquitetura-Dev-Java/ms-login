@@ -1,4 +1,4 @@
-package com.ms.login.infrastructure.config.security;
+package com.ms.login.infrastructure.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ms.login.entrypoint.controllers.handlers.ApiError;

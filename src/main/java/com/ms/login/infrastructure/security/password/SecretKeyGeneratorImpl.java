@@ -1,4 +1,4 @@
-package com.ms.login.infrastructure.config.security.password;
+package com.ms.login.infrastructure.security.password;
 
 import com.ms.login.application.gateway.SecretKeyGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;

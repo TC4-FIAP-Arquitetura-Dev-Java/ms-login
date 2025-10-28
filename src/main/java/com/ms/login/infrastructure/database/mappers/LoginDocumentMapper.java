@@ -12,12 +12,12 @@ public interface LoginDocumentMapper {
     
     LoginDocumentMapper INSTANCE = Mappers.getMapper(LoginDocumentMapper.class);
 
-    @Mapping(target = "dataCriacao", expression = "java(loginDocument.getDataCriacao() != null ? loginDocument.getDataCriacao().atOffset(java.time.ZoneOffset.UTC) : null)")
-    @Mapping(target = "dataAlteracao", expression = "java(loginDocument.getDataAlteracao() != null ? loginDocument.getDataAlteracao().atOffset(java.time.ZoneOffset.UTC) : null)")
+    @Mapping(target = "createdAt", expression = "java(loginDocument.getCreatedAt() != null ? loginDocument.getCreatedAt().atOffset(java.time.ZoneOffset.UTC) : null)")
+    @Mapping(target = "updatedAt", expression = "java(loginDocument.getUpdatedAt() != null ? loginDocument.getUpdatedAt().atOffset(java.time.ZoneOffset.UTC) : null)")
     LoginDomain toDomain(LoginDocument loginDocument);
 
-    @Mapping(target = "dataCriacao", expression = "java(loginDomain.getDataCriacao() != null ? loginDomain.getDataCriacao().toInstant() : null)")
-    @Mapping(target = "dataAlteracao", expression = "java(loginDomain.getDataAlteracao() != null ? loginDomain.getDataAlteracao().toInstant() : null)")
+    @Mapping(target = "createdAt", expression = "java(loginDomain.getCreatedAt() != null ? loginDomain.getCreatedAt().toInstant() : null)")
+    @Mapping(target = "updatedAt", expression = "java(loginDomain.getUpdatedAt() != null ? loginDomain.getUpdatedAt().toInstant() : null)")
     LoginDocument toDocument(LoginDomain loginDomain);
     
 }

@@ -1,8 +1,7 @@
 package com.ms.login.domain.model;
 
 import com.ms.login.domain.enums.RoleEnum;
-
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public class LoginDomain {
 
@@ -10,8 +9,8 @@ public class LoginDomain {
     private String username;
     private String password;
     private RoleEnum roleEnum;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
     public String getUserId() {
         return userId;
@@ -45,19 +44,19 @@ public class LoginDomain {
         this.roleEnum = roleEnum;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
+    public OffsetDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
 }

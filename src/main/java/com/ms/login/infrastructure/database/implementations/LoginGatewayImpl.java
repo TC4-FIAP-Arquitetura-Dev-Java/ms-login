@@ -5,16 +5,16 @@ import com.ms.login.domain.model.LoginDomain;
 import com.ms.login.infrastructure.database.entities.LoginDocument;
 import com.ms.login.infrastructure.database.mappers.LoginDocumentMapper;
 import com.ms.login.infrastructure.database.repositories.LoginRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
+@RequiredArgsConstructor
 public class LoginGatewayImpl implements LoginGateway {
 
     private final LoginRepository loginRepository;
-
-    public LoginGatewayImpl(LoginRepository loginRepository) {
-        this.loginRepository = loginRepository;
-    }
 
     @Override
     public void register(LoginDomain loginDomain) {
@@ -22,24 +22,13 @@ public class LoginGatewayImpl implements LoginGateway {
         loginRepository.save(loginDocument);
     }
 
-//    @Override
-//    public Optional<LoginDomain> authenticate(CredentialDomain credentials) {
-//        Optional<LoginDocument> document = loginRepository.findById(credentials.getUsername());
-//        LoginDomain loginDomain = LoginDocumentMapper.INSTANCE.toDomain(document.get());
-//        return Optional.of(loginDomain);
-//    }
-//
-//    @Override
-//    public AuthTokenDomain refreshToken(String refreshToken) {
-//        return null;
-//    }
-
-//    @Override
-//    public void invalidateTokens(String userId) {}
-
-
     @Override
     public Optional<LoginDomain> getUsername(String username) {
+        LoginDocument loginDocument = loginRepository.findByUsername(username);
+
+        if(loginDocument != null){
+            return Optional.of(LoginDocumentMapper.INSTANCE.toDomain(loginDocument));
+        }
         return Optional.empty();
     }
 }

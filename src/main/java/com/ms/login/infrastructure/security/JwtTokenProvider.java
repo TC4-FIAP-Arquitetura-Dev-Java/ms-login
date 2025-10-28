@@ -1,6 +1,8 @@
 package com.ms.login.infrastructure.security;
 
 import com.ms.login.domain.enums.RoleEnum;
+import io.jsonwebtoken.io.Decoders;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import io.jsonwebtoken.Claims;
@@ -10,6 +12,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
@@ -17,8 +20,11 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private final String ACCESS_TOKEN_SECRET = System.getenv("ACCESS_TOKEN_SECRET");
-    private final String REFRESH_TOKEN_SECRET = System.getenv("REFRESH_TOKEN_SECRET");
+    @Value("${jwt.access-token-secret}")
+    private String ACCESS_TOKEN_SECRET;
+
+    @Value("${jwt.refresh-token-secret}")
+    private String REFRESH_TOKEN_SECRET;
 
     private final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60; // 1 hora
     private final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 dias
@@ -28,20 +34,24 @@ public class JwtTokenProvider {
     }
 
     public String generateAccessToken(String username) {
+        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(ACCESS_TOKEN_SECRET));
+
         return Jwts.builder()
                 .setSubject(username)
                 .claim("token_type", "access")
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                .signWith(SignatureAlgorithm.HS512, ACCESS_TOKEN_SECRET)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String generateRefreshToken(String username) {
+        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(REFRESH_TOKEN_SECRET));
+
         return Jwts.builder()
                 .setSubject(username)
                 .claim("token_type", "refresh")
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
-                .signWith(SignatureAlgorithm.HS512, REFRESH_TOKEN_SECRET)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 

@@ -30,6 +30,10 @@ public class MyUserDetails implements UserDetails {
         );
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
     @Override
     public String getPassword() {
         return password;
@@ -38,6 +42,26 @@ public class MyUserDetails implements UserDetails {
     @Override
     public String getUsername() {
         return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // or your own logic
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true; // or your own logic
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // or your own logic
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true; // or your own logic
     }
 
     public RoleEnum getRoleEnum() {

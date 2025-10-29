@@ -52,9 +52,10 @@ public class LoginUseCaseImpl implements LoginUseCase {
             MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
 
             // Geração do token JWT com claims completos
-            String token = jwtTokenProvider.generateAccessToken(userDetails.getUsername());
+            String token = jwtTokenProvider.generateAccessToken(userDetails.getUsername(), userDetails.getUserId(), userDetails.getRoleEnum());
+            String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails.getUsername());
 
-            Claims claims = jwtTokenProvider.extractClaims(token);
+            Claims claims = jwtTokenProvider.extractClaimsAcessToken(token);
             Date expiresAt = jwtTokenProvider.extractExpirationDate(claims);
             String userId = jwtTokenProvider.extractUserId(claims);
             String role = jwtTokenProvider.extractRole(claims).name();
@@ -63,7 +64,7 @@ public class LoginUseCaseImpl implements LoginUseCase {
             securityAuditLogger.logLoginAttempt(username, clientIp, true, "SUCCESS");
             rateLimitingFilter.clearAttempts(clientIp);
 
-            return new AuthTokenDomain(token, userDetails.getUsername(), role, expiresAt.toString(), userId);
+            return new AuthTokenDomain(token, refreshToken, userDetails.getUsername(), role, userId, expiresAt.toString());
 
         } catch (BadCredentialsException e) {
             securityAuditLogger.logLoginAttempt(username, clientIp, false, "INVALID_CREDENTIALS");

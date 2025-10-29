@@ -5,6 +5,7 @@ import com.ms.login.domain.model.AuthTokenDomain;
 import com.ms.login.domain.model.LoginDomain;
 import com.ms.loginDomain.gen.model.LoginResponseDto;
 import com.ms.loginDomain.gen.model.RegisterRequestDto;
+import com.ms.loginDomain.gen.model.RoleEnumDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -21,13 +22,18 @@ public interface AuthDtoMapper {
     @Mapping(source = "roleEnum", target = "roleEnum", qualifiedByName = "toRoleEnum")
     LoginDomain toLoginDomain(RegisterRequestDto registerRequestDto);
 
-    @Mapping(target = "userId", ignore = true)
-    @Mapping(target = "roleEnum", ignore = true)
+    @Mapping(source = "roleEnum", target = "roleEnum", qualifiedByName = "toRoleEnumDto")
     LoginResponseDto toLoginResponseDto(AuthTokenDomain authTokenDomain);
 
     @Named("toRoleEnum")
     default RoleEnum mapRole(String role) {
         if (role == null) return null;
         return RoleEnum.valueOf(role.toUpperCase());
+    }
+
+    @Named("toRoleEnumDto")
+    default RoleEnumDto mapRoleDto(String role) {
+        if (role == null) return null;
+        return RoleEnumDto.valueOf(role.toUpperCase());
     }
 }

@@ -6,24 +6,24 @@ public class AuthTokenDomain {
     private String accessToken;
     private String refreshToken;
     private String username;
-    private String role;
+    private String roleEnum;
     private String expiresAt;
     private String userId;
 
-    public AuthTokenDomain(String accessToken, String username, String role, String userId, String expiresAt) {
+    public AuthTokenDomain(String accessToken, String username, String roleEnum, String userId, String expiresAt) {
         this.accessToken = accessToken;
         this.username = username;
-        this.role = role;
+        this.roleEnum = roleEnum;
         this.userId = userId;
         this.expiresAt = expiresAt;
     }
 
     // Construtor para login + refresh token (quando houver)
-    public AuthTokenDomain(String accessToken, String refreshToken, String username, String role, String userId, String expiresAt) {
+    public AuthTokenDomain(String accessToken, String refreshToken, String username, String roleEnum, String userId, String expiresAt) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.username = username;
-        this.role = role;
+        this.roleEnum = roleEnum;
         this.userId = userId;
         this.expiresAt = expiresAt;
     }
@@ -52,12 +52,12 @@ public class AuthTokenDomain {
         this.username = username;
     }
 
-    public String getRole() {
-        return role;
+    public String getRoleEnum() {
+        return roleEnum;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setRoleEnum(String roleEnum) {
+        this.roleEnum = roleEnum;
     }
 
     public String getExpiresAt() {

@@ -25,7 +25,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
             throws IOException {
 
         UserDetails user = (UserDetails) authentication.getPrincipal();
-        String token = jwtUtil.generateAccessToken(user.getUsername());
+        String token = jwtUtil.generateAccessToken(user.getUsername(), null, null);
 
         // Caso queira redirecionar com o token:
         String redirectUrl = "/home?token=" + token;

@@ -29,30 +29,50 @@ public class JwtTokenProvider {
     private final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60; // 1 hora
     private final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 dias
 
+    //Access Token
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateAccessToken(String username) {
-        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(ACCESS_TOKEN_SECRET));
+    //Refresh Token
+    private Key getSigningKeyFromRefreshToken() {
+        return Keys.hmacShaKeyFor(REFRESH_TOKEN_SECRET.getBytes(StandardCharsets.UTF_8));
+    }
 
+    public String generateAccessToken(String username, String userId, RoleEnum roleEnum) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("token_type", "access")
+                .claim("userId", userId)
+                .claim("role", roleEnum)
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String generateRefreshToken(String username) {
-        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(REFRESH_TOKEN_SECRET));
-
         return Jwts.builder()
                 .setSubject(username)
                 .claim("token_type", "refresh")
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .signWith(getSigningKeyFromRefreshToken(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public Claims extractClaimsAcessToken(String token){
+        return extractClaims(token, getSigningKey());
+    }
+
+    public Claims extractClaimsRefreshToken(String token){
+        return extractClaims(token, getSigningKeyFromRefreshToken());
+    }
+
+    private Claims extractClaims(String token, Key typeToken) {
+        return Jwts.parserBuilder()
+                .setSigningKey(typeToken)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     public boolean isValidAcessToken(String token) {
@@ -84,25 +104,31 @@ public class JwtTokenProvider {
                 .getBody().getSubject();
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateToken(String accessToken) {
         try{
             Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes()))
+                    .setSigningKey(getSigningKey())
                     .build()
-                    .parseClaimsJws(token);
+                    .parseClaimsJws(accessToken);
             return true;
         }catch (JwtException | IllegalArgumentException e){
             return false;
         }
     }
 
-    public Claims extractClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    public boolean validateRefreshToken(String refreshToken) {
+        try{
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKeyFromRefreshToken())
+                    .build()
+                    .parseClaimsJws(refreshToken);
+            return true;
+        }catch (JwtException | IllegalArgumentException e){
+            return false;
+        }
     }
+
+
 
     public RoleEnum extractRole(Claims claims) {
         String roleStr = claims.get("role", String.class);

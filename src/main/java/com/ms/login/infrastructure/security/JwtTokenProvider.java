@@ -116,20 +116,6 @@ public class JwtTokenProvider {
         }
     }
 
-    public boolean validateRefreshToken(String refreshToken) {
-        try{
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKeyFromRefreshToken())
-                    .build()
-                    .parseClaimsJws(refreshToken);
-            return true;
-        }catch (JwtException | IllegalArgumentException e){
-            return false;
-        }
-    }
-
-
-
     public RoleEnum extractRole(Claims claims) {
         String roleStr = claims.get("role", String.class);
         return RoleEnum.valueOf(roleStr);

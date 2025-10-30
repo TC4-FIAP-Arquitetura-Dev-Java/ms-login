@@ -1,5 +1,6 @@
 package com.ms.login.infrastructure.config.usecase;
 
+import com.ms.login.application.usecase.SessionTokenUseCase;
 import com.ms.login.application.usecase.implementation.LoginUseCaseImpl;
 import com.ms.login.infrastructure.security.ClientIpResolver;
 import com.ms.login.infrastructure.security.JwtTokenProvider;
@@ -14,10 +15,13 @@ public class LoginConfig {
 
     @Bean
     public LoginUseCaseImpl loginUseCase(AuthenticationManager authenticationManager,
-                            JwtTokenProvider jwtTokenProvider,
-                            SecurityAuditLogger securityAuditLogger,
-                            RateLimitingFilter rateLimitingFilter,
-                            ClientIpResolver clientIpResolver) {
-        return new LoginUseCaseImpl(authenticationManager, jwtTokenProvider, securityAuditLogger, rateLimitingFilter, clientIpResolver);
+                                         JwtTokenProvider jwtTokenProvider,
+                                         SecurityAuditLogger securityAuditLogger,
+                                         RateLimitingFilter rateLimitingFilter,
+                                         ClientIpResolver clientIpResolver,
+                                         SessionTokenUseCase sessionTokenUseCase) {
+
+        return new LoginUseCaseImpl(authenticationManager, jwtTokenProvider, securityAuditLogger,
+                rateLimitingFilter, clientIpResolver, sessionTokenUseCase);
     }
 }

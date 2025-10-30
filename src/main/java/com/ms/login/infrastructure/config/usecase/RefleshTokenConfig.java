@@ -1,7 +1,8 @@
 package com.ms.login.infrastructure.config.usecase;
 
 import com.ms.login.application.gateway.LoginGateway;
-import com.ms.login.application.usecase.implementation.RefleshTokenUseCaseImpl;
+import com.ms.login.application.usecase.SessionTokenUseCase;
+import com.ms.login.application.usecase.implementation.RefleshUseCaseImpl;
 import com.ms.login.infrastructure.security.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,8 +11,9 @@ import org.springframework.context.annotation.Configuration;
 public class RefleshTokenConfig {
 
     @Bean
-    public RefleshTokenUseCaseImpl refreshTokenUseCase(JwtTokenProvider jwtTokenProvider,
-                                                       LoginGateway loginGateway) {
-        return new RefleshTokenUseCaseImpl(jwtTokenProvider, loginGateway);
+    public RefleshUseCaseImpl refreshTokenUseCase(JwtTokenProvider jwtTokenProvider,
+                                                  LoginGateway loginGateway,
+                                                  SessionTokenUseCase sessionTokenUseCase) {
+        return new RefleshUseCaseImpl(jwtTokenProvider, loginGateway, sessionTokenUseCase);
     }
 }

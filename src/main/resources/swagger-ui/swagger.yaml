@@ -92,7 +92,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
+                $ref: '#/components/schemas/RefreshResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -233,6 +233,23 @@ components:
         userId:
           type: string
           example: 652ff3a9b1c2d40012ab45de
+
+    RefreshResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Token JWT gerado após login
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.accessToken...
+        refreshToken:
+          type: string
+          description: Token de atualização
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refreshToken...
+        expiresAt:
+          type: string
+          format: string
+          description: Data e hora de expiração do token
+          example: 2025-10-22T23:59:59Z
 
     LogoutResponse:
       type: object

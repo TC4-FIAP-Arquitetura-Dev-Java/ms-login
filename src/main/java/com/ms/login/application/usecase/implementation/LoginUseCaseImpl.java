@@ -1,6 +1,7 @@
 package com.ms.login.application.usecase.implementation;
 
 import com.ms.login.application.usecase.LoginUseCase;
+import com.ms.login.application.usecase.SessionTokenUseCase;
 import com.ms.login.domain.model.AuthTokenDomain;
 import com.ms.login.infrastructure.security.*;
 import io.jsonwebtoken.Claims;
@@ -18,17 +19,20 @@ public class LoginUseCaseImpl implements LoginUseCase {
     private final SecurityAuditLogger securityAuditLogger;
     private final RateLimitingFilter rateLimitingFilter;
     private final ClientIpResolver clientIpResolver;
+    private final SessionTokenUseCase sessionTokenUseCase;
 
     public LoginUseCaseImpl(AuthenticationManager authenticationManager,
                             JwtTokenProvider jwtTokenProvider,
                             SecurityAuditLogger securityAuditLogger,
                             RateLimitingFilter rateLimitingFilter,
-                            ClientIpResolver clientIpResolver) {
+                            ClientIpResolver clientIpResolver,
+                            SessionTokenUseCase sessionTokenUseCase) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.securityAuditLogger = securityAuditLogger;
         this.rateLimitingFilter = rateLimitingFilter;
         this.clientIpResolver = clientIpResolver;
+        this.sessionTokenUseCase = sessionTokenUseCase;
     }
 
     @Override
@@ -52,19 +56,21 @@ public class LoginUseCaseImpl implements LoginUseCase {
             MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
 
             // Geração do token JWT com claims completos
-            String token = jwtTokenProvider.generateAccessToken(userDetails.getUsername(), userDetails.getUserId(), userDetails.getRoleEnum());
-            String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails.getUsername());
+            String accessToken = jwtTokenProvider.generateAccessToken(
+                    userDetails.getUsername(), userDetails.getUserId(), userDetails.getRoleEnum());
 
-            Claims claims = jwtTokenProvider.extractClaimsAcessToken(token);
+            String refreshToken = sessionTokenUseCase.generateRefreshToken(userDetails);
+
+            Claims claims = jwtTokenProvider.extractClaimsAcessToken(accessToken);
             Date expiresAt = jwtTokenProvider.extractExpirationDate(claims);
-            String userId = jwtTokenProvider.extractUserId(claims);
-            String role = jwtTokenProvider.extractRole(claims).name();
 
             // Auditoria e rate limit
             securityAuditLogger.logLoginAttempt(username, clientIp, true, "SUCCESS");
             rateLimitingFilter.clearAttempts(clientIp);
 
-            return new AuthTokenDomain(token, refreshToken, userDetails.getUsername(), role, userId, expiresAt.toString());
+            return new AuthTokenDomain(accessToken, refreshToken, userDetails.getUsername(),
+                    userDetails.getRoleEnum().name(), userDetails.getUserId(), expiresAt.toString()
+            );
 
         } catch (BadCredentialsException e) {
             securityAuditLogger.logLoginAttempt(username, clientIp, false, "INVALID_CREDENTIALS");

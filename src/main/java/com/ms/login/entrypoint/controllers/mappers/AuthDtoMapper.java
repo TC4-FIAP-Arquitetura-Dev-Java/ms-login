@@ -4,6 +4,7 @@ import com.ms.login.domain.enums.RoleEnum;
 import com.ms.login.domain.model.AuthTokenDomain;
 import com.ms.login.domain.model.LoginDomain;
 import com.ms.loginDomain.gen.model.LoginResponseDto;
+import com.ms.loginDomain.gen.model.RefreshResponseDto;
 import com.ms.loginDomain.gen.model.RegisterRequestDto;
 import com.ms.loginDomain.gen.model.RoleEnumDto;
 import org.mapstruct.Mapper;
@@ -24,6 +25,8 @@ public interface AuthDtoMapper {
 
     @Mapping(source = "roleEnum", target = "roleEnum", qualifiedByName = "toRoleEnumDto")
     LoginResponseDto toLoginResponseDto(AuthTokenDomain authTokenDomain);
+
+    RefreshResponseDto toRefreshResponseDto(AuthTokenDomain authTokenDomain);
 
     @Named("toRoleEnum")
     default RoleEnum mapRole(String role) {

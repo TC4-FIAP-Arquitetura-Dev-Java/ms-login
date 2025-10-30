@@ -1,27 +1,19 @@
 package com.ms.login.application.usecase.implementation;
 
 import com.ms.login.application.usecase.LogoutUseCase;
-import com.ms.login.infrastructure.security.JwtTokenProvider;
-import org.springframework.security.authentication.BadCredentialsException;
+import com.ms.login.application.usecase.SessionTokenUseCase;
 
 public class LogoutUseCaseImpl implements LogoutUseCase {
 
-    private final JwtTokenProvider jwtTokenProvider;
+    private final SessionTokenUseCase sessionTokenUseCase;
 
-    public LogoutUseCaseImpl(JwtTokenProvider jwtTokenProvider) {
-        this.jwtTokenProvider = jwtTokenProvider;
+    public LogoutUseCaseImpl(SessionTokenUseCase sessionTokenUseCase) {
+        this.sessionTokenUseCase = sessionTokenUseCase;
     }
 
     @Override
     public void logoutLogin(String refreshToken) {
-        try {
-            if (!jwtTokenProvider.validateToken(refreshToken)) {
-                throw new BadCredentialsException("Invalid refresh token");
-            }
-
-        } catch (Exception e) {
-            throw new BadCredentialsException("Unable to logout");
-        }
+        sessionTokenUseCase.revokeRefreshToken(refreshToken);
     }
 }
 

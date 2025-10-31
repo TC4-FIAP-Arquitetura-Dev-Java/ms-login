@@ -50,21 +50,8 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String generateRefreshToken(String username) {
-        return Jwts.builder()
-                .setSubject(username)
-                .claim("token_type", "refresh")
-                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
-                .signWith(getSigningKeyFromRefreshToken(), SignatureAlgorithm.HS256)
-                .compact();
-    }
-
     public Claims extractClaimsAcessToken(String token){
         return extractClaims(token, getSigningKey());
-    }
-
-    public Claims extractClaimsRefreshToken(String token){
-        return extractClaims(token, getSigningKeyFromRefreshToken());
     }
 
     private Claims extractClaims(String token, Key typeToken) {

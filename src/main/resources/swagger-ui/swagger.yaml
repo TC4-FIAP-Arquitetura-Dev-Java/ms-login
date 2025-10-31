@@ -202,9 +202,9 @@ components:
     LogoutRequest:
       type: object
       required:
-        - token
+        - refreshToken
       properties:
-        token:
+        refreshToken:
           type: string
           description: Token JWT que será invalidado
           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.accessToken...

@@ -37,7 +37,7 @@ public class RefleshUseCaseImpl implements RefreshTokenUseCase {
 
             // Rotaciona refresh token
             sessionTokenUseCase.revokeRefreshToken(refreshToken);
-            String newRefreshToken = sessionTokenUseCase.generateRefreshToken(user);
+            String newRefreshToken = sessionTokenUseCase.generateRefreshToken(info.getUserId(), info.getUsername());
 
             // Gera novo access token
             String newAccessToken = jwtTokenProvider.generateAccessToken(
@@ -54,10 +54,10 @@ public class RefleshUseCaseImpl implements RefreshTokenUseCase {
                     user.getUserId(),
                     expiresAt.toString()
             );
-        }catch (ExpiredJwtException e){
-            throw new BadCredentialsException("Expired refresh token");
-        }catch (Exception e) {
-            throw new BadCredentialsException("Invalid refresh token");
+        }catch (ExpiredJwtException e) {
+            throw new BadCredentialsException("Refresh token has expired. Please log in again.");
+        } catch (Exception e) {
+            throw new BadCredentialsException("Invalid refresh token. Please request a new one.");
         }
     }
 }

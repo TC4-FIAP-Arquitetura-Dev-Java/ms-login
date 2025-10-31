@@ -59,7 +59,7 @@ public class LoginUseCaseImpl implements LoginUseCase {
             String accessToken = jwtTokenProvider.generateAccessToken(
                     userDetails.getUsername(), userDetails.getUserId(), userDetails.getRoleEnum());
 
-            String refreshToken = sessionTokenUseCase.generateRefreshToken(userDetails);
+            String refreshToken = sessionTokenUseCase.generateRefreshToken(userDetails.getUserId(), userDetails.getUsername());
 
             Claims claims = jwtTokenProvider.extractClaimsAcessToken(accessToken);
             Date expiresAt = jwtTokenProvider.extractExpirationDate(claims);
@@ -75,7 +75,7 @@ public class LoginUseCaseImpl implements LoginUseCase {
         } catch (BadCredentialsException e) {
             securityAuditLogger.logLoginAttempt(username, clientIp, false, "INVALID_CREDENTIALS");
             rateLimitingFilter.recordFailedAttempt(clientIp);
-            throw e;
+            throw new BadCredentialsException("Invalid Credentials", e);
         } catch (Exception e) {
             securityAuditLogger.logLoginAttempt(username, clientIp, false, "SYSTEM_ERROR");
             throw new BadCredentialsException("Authentication failed", e);

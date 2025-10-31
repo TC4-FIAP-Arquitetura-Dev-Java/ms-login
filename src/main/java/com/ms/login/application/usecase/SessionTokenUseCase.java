@@ -1,11 +1,10 @@
 package com.ms.login.application.usecase;
 
 import com.ms.login.domain.model.TokenInfoDomain;
-import com.ms.login.infrastructure.security.MyUserDetails;
 
 public interface SessionTokenUseCase {
 
-    String generateRefreshToken(MyUserDetails user);
+    String generateRefreshToken(String userId, String username);
 
     TokenInfoDomain validateRefreshToken(String token);
 

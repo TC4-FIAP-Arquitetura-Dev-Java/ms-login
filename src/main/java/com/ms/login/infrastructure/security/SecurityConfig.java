@@ -22,17 +22,22 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RateLimitingFilter rateLimitingFilter;
     private final SecurityHeadersFilter securityHeadersFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
 //    private final CustomOAuth2SuccessHandler oAuth2SuccessHandler;
 //    private final AuthenticationEntryPoint authenticationEntryPoint;
 //    private final AccessDeniedHandler accessDeniedHandler;
 
+
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
                           RateLimitingFilter rateLimitingFilter,
-                          SecurityHeadersFilter securityHeadersFilter) {
+                          SecurityHeadersFilter securityHeadersFilter,
+                          CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
+
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.rateLimitingFilter = rateLimitingFilter;
         this.securityHeadersFilter = securityHeadersFilter;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
     @Bean
@@ -44,9 +49,9 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // Endpoints públicos
-                        .requestMatchers("/v1/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/v1/users").permitAll()
-                        .requestMatchers("/v1/auth/refresh").permitAll()
+                        .requestMatchers("/ms-login/v1/register").permitAll()
+                        .requestMatchers("/ms-login/v1/login").permitAll()
+                        .requestMatchers("/ms-login/v1/refresh").permitAll()
                         .requestMatchers("/h2-console/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
                         // Endpoints de logout requerem autenticação
@@ -61,7 +66,7 @@ public class SecurityConfig {
                 .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
                 );
 

@@ -22,22 +22,13 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RateLimitingFilter rateLimitingFilter;
     private final SecurityHeadersFilter securityHeadersFilter;
-    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-
-//    private final CustomOAuth2SuccessHandler oAuth2SuccessHandler;
-//    private final AuthenticationEntryPoint authenticationEntryPoint;
-//    private final AccessDeniedHandler accessDeniedHandler;
-
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
                           RateLimitingFilter rateLimitingFilter,
-                          SecurityHeadersFilter securityHeadersFilter,
-                          CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
-
+                          SecurityHeadersFilter securityHeadersFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.rateLimitingFilter = rateLimitingFilter;
         this.securityHeadersFilter = securityHeadersFilter;
-        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
     @Bean
@@ -45,28 +36,26 @@ public class SecurityConfig {
                                            AuthenticationEntryPoint authenticationEntryPoint,
                                            AccessDeniedHandler accessDeniedHandler
     ) throws Exception {
-
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // Endpoints públicos
-                        .requestMatchers("/ms-login/v1/register").permitAll()
-                        .requestMatchers("/ms-login/v1/login").permitAll()
-                        .requestMatchers("/ms-login/v1/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/refresh").permitAll()
                         .requestMatchers("/h2-console/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-
-                        // Endpoints de logout requerem autenticação
-                        .requestMatchers("/v1/auth/logout").authenticated()
                         .anyRequest().authenticated()
                 )
+                // Stateless (sem sessão HTTP)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false))
+                )
+                // Filtros de segurança
                 .addFilterBefore(securityHeadersFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // Tratamento de erros
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
                 );
 
@@ -83,5 +72,4 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-
 }

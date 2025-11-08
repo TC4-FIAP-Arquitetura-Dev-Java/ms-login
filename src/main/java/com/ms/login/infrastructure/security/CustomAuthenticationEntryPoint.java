@@ -1,7 +1,7 @@
 package com.ms.login.infrastructure.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
+import com.ms.login.entrypoint.controllers.handlers.ApiError;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
@@ -9,28 +9,27 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
-                         AuthenticationException authException) throws IOException, ServletException {
-
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", 401);
-        body.put("error", "Unauthorized");
-        body.put("message", authException.getMessage()); // mensagem vinda do throw
-        body.put("path", request.getRequestURI());
-
-        response.getOutputStream().println(objectMapper.writeValueAsString(body));
+                         AuthenticationException ex) throws IOException {
+        try {
+            ApiError apiError = new ApiError(
+                    401,
+                    "Unauthorized",
+                    ex.getMessage(),
+                    request.getRequestURI()
+            );
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write(objectMapper.writeValueAsString(apiError));
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        }
     }
 }

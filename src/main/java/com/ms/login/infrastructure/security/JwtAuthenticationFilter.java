@@ -19,14 +19,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
     private final MyUserDetailsService myUserDetailsService;
-    private final AuthenticationEntryPoint authenticationEntryPoint;
 
     public JwtAuthenticationFilter(JwtTokenProvider tokenProvider,
-                                   MyUserDetailsService myUserDetailsService,
-                                   AuthenticationEntryPoint authenticationEntryPoint) {
+                                   MyUserDetailsService myUserDetailsService) {
         this.tokenProvider = tokenProvider;
         this.myUserDetailsService = myUserDetailsService;
-        this.authenticationEntryPoint = authenticationEntryPoint;
     }
 
     @Override

@@ -12,6 +12,25 @@ public class LoginDomain {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
+    public LoginDomain() {
+    }
+
+    public LoginDomain(String userId, String username, String password, RoleEnum roleEnum) {
+        this.userId = userId;
+        this.username = username;
+        this.password = password;
+        this.roleEnum = roleEnum;
+    }
+
+    public LoginDomain(String userId, String username, String password, RoleEnum roleEnum, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
+        this.userId = userId;
+        this.username = username;
+        this.password = password;
+        this.roleEnum = roleEnum;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     public String getUserId() {
         return userId;
     }

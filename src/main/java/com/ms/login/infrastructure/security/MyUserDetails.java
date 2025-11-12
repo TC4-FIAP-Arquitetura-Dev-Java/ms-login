@@ -30,6 +30,14 @@ public class MyUserDetails implements UserDetails {
         );
     }
 
+    public MyUserDetails(String userId, String username, String password, RoleEnum roleEnum, Collection<? extends GrantedAuthority> authorities) {
+        this.userId = userId;
+        this.username = username;
+        this.password = password;
+        this.roleEnum = roleEnum;
+        this.authorities = authorities;
+    }
+
     public String getUserId() {
         return userId;
     }

@@ -22,12 +22,12 @@ public class MyUserDetailsService implements UserDetailsService {
             LoginDocument login = loginRepository.findByUsername(username);
 
             if(login == null){
-                throw new UsernameNotFoundException("Usuário não encontrado");
+                throw new UsernameNotFoundException("User not found.");
             }
 
             return new MyUserDetails(login);
         }catch (Exception e){
-            throw new UsernameNotFoundException("Erro ao buscar credenciais " + e.getMessage());
+            throw new UsernameNotFoundException("Failed to find user credentials. " + e.getMessage());
         }
     }
 }

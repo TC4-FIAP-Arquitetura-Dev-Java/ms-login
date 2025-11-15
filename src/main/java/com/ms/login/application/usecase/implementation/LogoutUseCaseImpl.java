@@ -13,6 +13,7 @@ public class LogoutUseCaseImpl implements LogoutUseCase {
 
     @Override
     public void logoutLogin(String refreshToken) {
+        sessionTokenUseCase.validateRefreshToken(refreshToken);
         sessionTokenUseCase.revokeRefreshToken(refreshToken);
     }
 }

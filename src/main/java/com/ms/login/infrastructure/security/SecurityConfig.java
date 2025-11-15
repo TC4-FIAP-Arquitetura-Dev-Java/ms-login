@@ -23,10 +23,6 @@ public class SecurityConfig {
     private final RateLimitingFilter rateLimitingFilter;
     private final SecurityHeadersFilter securityHeadersFilter;
 
-//    private final CustomOAuth2SuccessHandler oAuth2SuccessHandler;
-//    private final AuthenticationEntryPoint authenticationEntryPoint;
-//    private final AccessDeniedHandler accessDeniedHandler;
-
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
                           RateLimitingFilter rateLimitingFilter,
                           SecurityHeadersFilter securityHeadersFilter) {
@@ -40,26 +36,24 @@ public class SecurityConfig {
                                            AuthenticationEntryPoint authenticationEntryPoint,
                                            AccessDeniedHandler accessDeniedHandler
     ) throws Exception {
-
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // Endpoints públicos
-                        .requestMatchers("/v1/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/v1/users").permitAll()
-                        .requestMatchers("/v1/auth/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/refresh").permitAll()
                         .requestMatchers("/h2-console/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-
-                        // Endpoints de logout requerem autenticação
-                        .requestMatchers("/v1/auth/logout").authenticated()
                         .anyRequest().authenticated()
                 )
+                // Stateless (sem sessão HTTP)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false))
+                )
+                // Filtros de segurança
                 .addFilterBefore(securityHeadersFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // Tratamento de erros
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
@@ -78,5 +72,4 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-
 }

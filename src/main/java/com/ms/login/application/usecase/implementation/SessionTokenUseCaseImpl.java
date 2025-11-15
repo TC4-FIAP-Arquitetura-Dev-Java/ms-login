@@ -2,7 +2,6 @@ package com.ms.login.application.usecase.implementation;
 
 import com.ms.login.application.usecase.SessionTokenUseCase;
 import com.ms.login.domain.model.TokenInfoDomain;
-import com.ms.login.infrastructure.security.MyUserDetails;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -29,17 +28,17 @@ public class SessionTokenUseCaseImpl implements SessionTokenUseCase {
     }
 
     // Gera JWT refresh token e guarda em memória
-    public String generateRefreshToken(MyUserDetails user) {
+    public String generateRefreshToken(String userId, String username) {
         LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(REFRESH_TOKEN_EXPIRATION / 1000);
 
         String token = Jwts.builder()
-                .setSubject(user.getUsername())
+                .setSubject(username)
                 .claim("token_type", "refresh")
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
 
-        refreshTokens.put(token, new TokenInfoDomain(user.getUserId(), user.getUsername(), expiresAt));
+        refreshTokens.put(token, new TokenInfoDomain(userId, username, expiresAt));
         return token;
     }
 

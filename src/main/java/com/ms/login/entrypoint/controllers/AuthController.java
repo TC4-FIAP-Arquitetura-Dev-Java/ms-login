@@ -1,5 +1,6 @@
 package com.ms.login.entrypoint.controllers;
 
+import com.fasterxml.jackson.databind.DatabindException;
 import com.ms.login.application.usecase.CreateLoginUseCase;
 import com.ms.login.application.usecase.LoginUseCase;
 import com.ms.login.application.usecase.LogoutUseCase;
@@ -12,6 +13,8 @@ import com.ms.loginDomain.gen.model.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.OffsetDateTime;
 
 @RestController
 @RequestMapping("/v1")
@@ -55,7 +58,10 @@ public class AuthController implements AutenticaoApi {
 
     @Override
     public ResponseEntity<LogoutResponseDto> _logout(LogoutRequestDto logoutRequestDto) {
-        logoutUseCase.logoutLogin(logoutRequestDto.getToken());
-        return ResponseEntity.status(HttpStatus.OK).build();
+        logoutUseCase.logoutLogin(logoutRequestDto.getRefreshToken());
+        LogoutResponseDto response = new LogoutResponseDto();
+        response.setMessage("Refresh token revoked successfully");
+        response.setTimestamp(OffsetDateTime.now());
+        return ResponseEntity.ok(response);
     }
 }

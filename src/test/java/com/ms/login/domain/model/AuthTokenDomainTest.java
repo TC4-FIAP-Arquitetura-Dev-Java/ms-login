@@ -63,4 +63,30 @@ class AuthTokenDomainTest {
         assertEquals(expiresAt, authTokenDomain.getExpiresAt());
         assertEquals(userId, authTokenDomain.getUserId());
     }
+
+    @Test
+    void setters_shouldUpdateFields() {
+        AuthTokenDomain authTokenDomain = new AuthTokenDomain("token1", "user1", RoleEnum.USER.name(), "id1", "exp1");
+
+        String newAccessToken = UUID.randomUUID().toString();
+        String newRefreshToken = UUID.randomUUID().toString();
+        String newUsername = "newuser";
+        String newRoleEnum = RoleEnum.ADMIN.name();
+        String newExpiresAt = UUID.randomUUID().toString();
+        String newUserId = UUID.randomUUID().toString();
+
+        authTokenDomain.setAccessToken(newAccessToken);
+        authTokenDomain.setRefreshToken(newRefreshToken);
+        authTokenDomain.setUsername(newUsername);
+        authTokenDomain.setRoleEnum(newRoleEnum);
+        authTokenDomain.setExpiresAt(newExpiresAt);
+        authTokenDomain.setUserId(newUserId);
+
+        assertEquals(newAccessToken, authTokenDomain.getAccessToken());
+        assertEquals(newRefreshToken, authTokenDomain.getRefreshToken());
+        assertEquals(newUsername, authTokenDomain.getUsername());
+        assertEquals(newRoleEnum, authTokenDomain.getRoleEnum());
+        assertEquals(newExpiresAt, authTokenDomain.getExpiresAt());
+        assertEquals(newUserId, authTokenDomain.getUserId());
+    }
 }

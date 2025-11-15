@@ -213,5 +213,43 @@ class RateLimitingFilterTest {
 
         verify(filterChain).doFilter(request, response);
     }
+
+    @Test
+    void doFilterInternal_shouldAllowRequest_whenXForwardedForIsEmpty() throws ServletException, IOException {
+        request.setRequestURI("/api/login");
+        request.setMethod("POST");
+        request.setRemoteAddr("192.168.1.1");
+        request.addHeader("X-Forwarded-For", "");
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void doFilterInternal_shouldAllowRequest_whenAttemptInfoIsNull() throws ServletException, IOException {
+        request.setRequestURI("/api/login");
+        request.setMethod("POST");
+        request.setRemoteAddr("192.168.1.1");
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void doFilterInternal_shouldAllowRequest_whenAttemptInfoExistsButNotLocked() throws ServletException, IOException {
+        String clientIp = "192.168.1.1";
+        request.setRequestURI("/api/login");
+        request.setMethod("POST");
+        request.setRemoteAddr(clientIp);
+
+        // Registrar apenas 1 tentativa (não bloqueia)
+        filter.recordFailedAttempt(clientIp);
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+    }
 }
 

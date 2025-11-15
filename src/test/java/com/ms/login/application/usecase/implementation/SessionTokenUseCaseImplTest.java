@@ -116,6 +116,16 @@ class SessionTokenUseCaseImplTest {
     }
 
     @Test
+    void shouldNotThrowExceptionWhenRevokingNonExistentToken() {
+        // given
+        String nonExistentToken = "non-existent-token";
+
+        // when & then - não deve lançar exceção quando o token não existe
+        sessionTokenUseCase.revokeRefreshToken(nonExistentToken);
+        // O método deve executar sem erro mesmo quando o token não existe
+    }
+
+    @Test
     void shouldRevokeAllUserTokens() {
         // given
         String userId1 = "1";

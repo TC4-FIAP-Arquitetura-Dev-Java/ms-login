@@ -15,8 +15,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class InputValidationFilterTest {
@@ -250,7 +249,7 @@ class InputValidationFilterTest {
     @Test
     void doFilterInternal_shouldAllowRequest_whenUserAgentIsNull() throws ServletException, IOException {
         request.setRequestURI("/api/login");
-        request.addHeader("User-Agent", null);
+        request.removeHeader("User-Agent");
 
         filter.doFilter(request, response, filterChain);
 
@@ -270,7 +269,7 @@ class InputValidationFilterTest {
     @Test
     void doFilterInternal_shouldAllowRequest_whenSuspiciousHeaderIsNull() throws ServletException, IOException {
         request.setRequestURI("/api/login");
-        request.addHeader("X-Forwarded-For", null);
+        request.removeHeader("X-Forwarded-For");
 
         filter.doFilter(request, response, filterChain);
 
@@ -285,6 +284,84 @@ class InputValidationFilterTest {
         filter.doFilter(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void doFilterInternal_shouldBlock_whenQueryStringHasSqlInjectionButParametersAreSafe() throws ServletException, IOException {
+        request.setRequestURI("/api/login");
+        request.setQueryString("param=admin' OR '1'='1");
+        request.addParameter("username", "validuser");
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain, never()).doFilter(request, response);
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    void doFilterInternal_shouldBlock_whenQueryStringHasXssButParametersAreSafe() throws ServletException, IOException {
+        request.setRequestURI("/api/login");
+        request.setQueryString("param=<script>alert('xss')</script>");
+        request.addParameter("username", "validuser");
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain, never()).doFilter(request, response);
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    void doFilterInternal_shouldBlock_whenParametersHaveSqlInjectionButQueryStringIsNull() throws ServletException, IOException {
+        request.setRequestURI("/api/login");
+        request.setQueryString(null);
+        request.addParameter("username", "admin' OR '1'='1");
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain, never()).doFilter(request, response);
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    void doFilterInternal_shouldBlock_whenParametersHaveXssButQueryStringIsNull() throws ServletException, IOException {
+        request.setRequestURI("/api/login");
+        request.setQueryString(null);
+        request.addParameter("username", "<script>alert('xss')</script>");
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain, never()).doFilter(request, response);
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    void doFilterInternal_shouldBlock_whenXRealIpHeaderIsTooLong() throws ServletException, IOException {
+        request.setRequestURI("/api/login");
+        StringBuilder longHeader = new StringBuilder();
+        for (int i = 0; i < 101; i++) {
+            longHeader.append("a");
+        }
+        request.addHeader("X-Real-IP", longHeader.toString());
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain, never()).doFilter(request, response);
+        assertThat(response.getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    void doFilterInternal_shouldBlock_whenXOriginatingIpHeaderIsTooLong() throws ServletException, IOException {
+        request.setRequestURI("/api/login");
+        StringBuilder longHeader = new StringBuilder();
+        for (int i = 0; i < 101; i++) {
+            longHeader.append("a");
+        }
+        request.addHeader("X-Originating-IP", longHeader.toString());
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain, never()).doFilter(request, response);
+        assertThat(response.getStatus()).isEqualTo(400);
     }
 }
 

@@ -117,6 +117,36 @@ class LoginUseCaseImplTest {
     }
 
     @Test
+    void shouldThrowExceptionWhenOnlyUsernameContainsMaliciousContent() {
+        // given
+        String maliciousUsername = "admin' OR '1'='1";
+        String safePassword = "password123";
+
+        // when & then
+        assertThrows(BadCredentialsException.class, () -> loginUseCase.login(maliciousUsername, safePassword));
+
+        verify(securityAuditLogger).logSuspiciousActivity(maliciousUsername, clientIp, "MALICIOUS_INPUT",
+                "Attempted login with malicious input");
+        verifyNoInteractions(authenticationManager);
+        verifyNoInteractions(jwtTokenProvider);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenOnlyPasswordContainsMaliciousContent() {
+        // given
+        String safeUsername = "testuser";
+        String maliciousPassword = "<script>alert('xss')</script>";
+
+        // when & then
+        assertThrows(BadCredentialsException.class, () -> loginUseCase.login(safeUsername, maliciousPassword));
+
+        verify(securityAuditLogger).logSuspiciousActivity(safeUsername, clientIp, "MALICIOUS_INPUT",
+                "Attempted login with malicious input");
+        verifyNoInteractions(authenticationManager);
+        verifyNoInteractions(jwtTokenProvider);
+    }
+
+    @Test
     void shouldThrowExceptionWhenCredentialsAreInvalid() {
         // given
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))

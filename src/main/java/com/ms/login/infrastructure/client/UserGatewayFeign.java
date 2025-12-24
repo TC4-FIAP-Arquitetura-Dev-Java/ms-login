@@ -1,0 +1,47 @@
+package com.ms.login.infrastructure.client;
+
+import com.ms.login.application.port.out.UserGateway;
+import com.ms.login.domain.model.UserDomain;
+import com.ms.login.infrastructure.client.dto.UserRequest;
+import com.ms.login.infrastructure.client.dto.UserResponse;
+import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+
+@Component
+public class UserGatewayFeign implements UserGateway {
+
+    private final UserClientFeign client;
+
+    public UserGatewayFeign(UserClientFeign client) {
+        this.client = client;
+    }
+
+    @Override
+    public UserDomain createUser(UserDomain user) {
+        UserRequest request = new UserRequest(
+                user.getUsername(),
+                user.getName(),
+                user.getPassword(),
+                user.getPassword(),
+                user.getActiveUser());
+
+        UserResponse response = client.create(request);
+
+        return new UserDomain(response.id(), response.name(), response.password(),
+                response.username(), response.email(),  response.activeUser());
+    }
+
+    @Override
+    public Optional<UserDomain> getUserByUsername(String username) {
+        UserResponse response = client.getUserByUsername(username);
+
+        return Optional.of(new UserDomain(
+                response.id(),
+                response.username(),
+                response.name(),
+                response.password(),
+                response.email(),
+                response.activeUser()));
+    }
+}

@@ -1,10 +1,10 @@
 package com.ms.login.infraestruture.dataproviders.security;
 
-import com.ms.login.infrastructure.database.entities.LoginDocument;
-import com.ms.login.infrastructure.database.repositories.LoginRepository;
+import com.ms.login.application.port.out.UserGateway;
+import com.ms.login.domain.enums.RoleEnum;
+import com.ms.login.domain.model.UserDomain;
 import com.ms.login.infrastructure.security.MyUserDetails;
 import com.ms.login.infrastructure.security.MyUserDetailsService;
-import com.ms.login.mocks.LoginMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
@@ -22,20 +24,28 @@ import static org.mockito.Mockito.when;
 class MyUserDetailsServiceTest {
 
     @Mock
-    private LoginRepository loginRepository;
+    private UserGateway userGateway;
 
     @InjectMocks
     private MyUserDetailsService userDetailsService;
 
     @BeforeEach
-    void setUp() {
-        // Setup básico
-    }
+    void setUp() {}
 
     @Test
     void loadUserByUsername_shouldReturnUserDetails_whenUserExists() {
-        LoginDocument loginDocument = LoginMock.getLoginDocument();
-        when(loginRepository.findByUsername("username")).thenReturn(loginDocument);
+        UserDomain userDomain = new UserDomain(
+                "1",
+                "User Name",
+                "username",     // <-- agora bate com o expected do teste
+                "password",
+                "email@test.com",
+                true,
+                RoleEnum.ADMIN
+        );
+
+        when(userGateway.getUserByUsername("username"))
+                .thenReturn(Optional.of(userDomain));
 
         UserDetails userDetails = userDetailsService.loadUserByUsername("username");
 
@@ -47,29 +57,32 @@ class MyUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_shouldThrowException_whenUserNotFound() {
-        when(loginRepository.findByUsername("nonexistent")).thenReturn(null);
+        when(userGateway.getUserByUsername("nonexistent"))
+                .thenReturn(Optional.empty()); // <-- CORREÇÃO AQUI
 
         assertThatThrownBy(() -> userDetailsService.loadUserByUsername("nonexistent"))
-            .isInstanceOf(UsernameNotFoundException.class)
-            .hasMessageContaining("User not found");
+                .isInstanceOf(UsernameNotFoundException.class)
+                .hasMessageContaining("User not found"); // agora passa
     }
 
     @Test
     void loadUserByUsername_shouldThrowException_whenRepositoryThrowsException() {
-        when(loginRepository.findByUsername("username")).thenThrow(new RuntimeException("Database error"));
+        when(userGateway.getUserByUsername("username"))
+                .thenThrow(new RuntimeException("Database error"));
 
         assertThatThrownBy(() -> userDetailsService.loadUserByUsername("username"))
-            .isInstanceOf(UsernameNotFoundException.class)
-            .hasMessageContaining("Failed to find user credentials");
+                .isInstanceOf(UsernameNotFoundException.class)
+                .hasMessageContaining("Failed to find user credentials");
     }
 
     @Test
     void loadUserByUsername_shouldThrowException_whenRepositoryThrowsNullPointerException() {
-        when(loginRepository.findByUsername("username")).thenThrow(new NullPointerException("Null error"));
+        when(userGateway.getUserByUsername("username"))
+                .thenThrow(new NullPointerException("Null error"));
 
         assertThatThrownBy(() -> userDetailsService.loadUserByUsername("username"))
-            .isInstanceOf(UsernameNotFoundException.class)
-            .hasMessageContaining("Failed to find user credentials");
+                .isInstanceOf(UsernameNotFoundException.class)
+                .hasMessageContaining("Failed to find user credentials");
     }
 }
 

@@ -8,6 +8,7 @@ public record UserResponse(
         String name,
         String password,
         String email,
+        RoleEnumDto roleEnum,
         Boolean activeUser,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt) {

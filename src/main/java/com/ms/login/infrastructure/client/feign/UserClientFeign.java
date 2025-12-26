@@ -1,4 +1,4 @@
-package com.ms.login.infrastructure.client;
+package com.ms.login.infrastructure.client.feign;
 
 import com.ms.login.infrastructure.client.dto.UserRequest;
 import com.ms.login.infrastructure.client.dto.UserResponse;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "ms-usuario", url = "${services.ms-usuario.url}")
+@FeignClient(name = "ms-usuario", url = "${usuario.service.url}")
 public interface UserClientFeign {
 
     @PostMapping("/users")

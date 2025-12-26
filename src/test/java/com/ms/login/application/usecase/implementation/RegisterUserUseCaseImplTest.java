@@ -2,10 +2,13 @@ package com.ms.login.application.usecase.implementation;
 
 import com.ms.login.application.gateway.LoginGateway;
 import com.ms.login.application.gateway.SecretKeyGenerator;
+import com.ms.login.application.port.out.UserGateway;
 import com.ms.login.domain.domainService.LoginDomainService;
 import com.ms.login.domain.exceptions.CredentialLoginAlreadyExistsException;
 import com.ms.login.domain.model.LoginDomain;
+import com.ms.login.domain.model.UserDomain;
 import com.ms.login.mocks.LoginMock;
+import com.ms.login.mocks.UserMock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +31,7 @@ class RegisterUserUseCaseImplTest {
     private RegisterUserUseCaseImpl useCase;
 
     @Mock
-    private LoginGateway loginGateway;
+    private UserGateway userGateway;
 
     @Mock
     private LoginDomainService loginDomainService;
@@ -43,25 +46,25 @@ class RegisterUserUseCaseImplTest {
 
     @Test
     void shouldRegisterNewLoginSuccessfully() {
-        // given
         var authentication = new TestingAuthenticationToken("user", "jwt-token");
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        LoginDomain domain = LoginMock.getLoginDomain();
+        UserDomain domain = UserMock.getUserDomain();
         String originalPassword = domain.getPassword();
         String originalUsername = domain.getUsername();
 
-        // when
-        doNothing().when(loginDomainService).checkExistsUsername(domain.getUsername());
-        doNothing().when(loginGateway).register(any(LoginDomain.class));
-        when(secretKeyGenerator.encode(anyString())).thenReturn("encodedPassword");
+        // mocks
+        doNothing().when(loginDomainService).checkExistsUsername(originalUsername);
+        when(secretKeyGenerator.encode(originalPassword)).thenReturn("encodedPassword");
+        doNothing().when(userGateway).createUser(any(UserDomain.class));
 
-//        useCase.register(domain);
+        // *** CHAMADA QUE FALTAVA ***
+        useCase.register(domain);
 
-        // then
+        // verificações
         verify(loginDomainService).checkExistsUsername(originalUsername);
         verify(secretKeyGenerator).encode(originalPassword);
-        verify(loginGateway).register(any(LoginDomain.class));
+        verify(userGateway).createUser(any(UserDomain.class));
         assertThat(domain.getUsername()).isEqualTo(originalUsername.toLowerCase());
         assertThat(domain.getPassword()).isEqualTo("encodedPassword");
     }
@@ -82,7 +85,7 @@ class RegisterUserUseCaseImplTest {
         // then
 //        assertThrows(CredentialLoginAlreadyExistsException.class, () -> useCase.register(domain));
         verify(loginDomainService).checkExistsUsername(domain.getUsername());
-        verifyNoInteractions(loginGateway);
+        verifyNoInteractions(userGateway);
         verifyNoInteractions(secretKeyGenerator);
     }
 
@@ -98,7 +101,7 @@ class RegisterUserUseCaseImplTest {
 
         // when
         doNothing().when(loginDomainService).checkExistsUsername(anyString());
-        doNothing().when(loginGateway).register(any(LoginDomain.class));
+        doNothing().when(userGateway).createUser(any(UserDomain.class));
         when(secretKeyGenerator.encode("plainPassword")).thenReturn("encodedPassword");
 
 //        useCase.register(domain);

@@ -4,8 +4,8 @@ import com.ms.login.application.usecase.RegisterUserUseCase;
 import com.ms.login.application.usecase.LoginUseCase;
 import com.ms.login.application.usecase.LogoutUseCase;
 import com.ms.login.application.usecase.RefreshTokenUseCase;
+import com.ms.login.domain.enums.RoleEnum;
 import com.ms.login.domain.model.AuthTokenDomain;
-import com.ms.login.domain.model.LoginDomain;
 import com.ms.login.domain.model.UserDomain;
 import com.ms.login.entrypoint.controllers.presenter.AuthPresenter;
 import com.ms.loginDomain.AutenticaoApi;
@@ -40,7 +40,7 @@ public class AuthController implements AutenticaoApi {
 
         //TODO: VERificar se isso vai continuar ou não nesse negocio
         UserDomain user = new UserDomain(null, null,registerRequestDto.getPassword(), registerRequestDto.getUsername(),
-                null, null);
+                null, null, RoleEnum.USER);
 
         UserDomain created = registerUserUseCase.register(user);
         return ResponseEntity.status(HttpStatus.CREATED).build();

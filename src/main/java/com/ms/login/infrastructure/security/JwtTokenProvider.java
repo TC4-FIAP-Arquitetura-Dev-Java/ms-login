@@ -1,9 +1,7 @@
 package com.ms.login.infrastructure.security;
 
 import com.ms.login.domain.enums.RoleEnum;
-import io.jsonwebtoken.io.Decoders;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

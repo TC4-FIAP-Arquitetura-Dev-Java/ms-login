@@ -1,9 +1,10 @@
-package com.ms.login.infrastructure.client;
+package com.ms.login.infrastructure.client.feign;
 
 import com.ms.login.application.port.out.UserGateway;
 import com.ms.login.domain.model.UserDomain;
 import com.ms.login.infrastructure.client.dto.UserRequest;
 import com.ms.login.infrastructure.client.dto.UserResponse;
+import com.ms.login.infrastructure.client.mapper.UserMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -19,29 +20,14 @@ public class UserGatewayFeign implements UserGateway {
 
     @Override
     public UserDomain createUser(UserDomain user) {
-        UserRequest request = new UserRequest(
-                user.getUsername(),
-                user.getName(),
-                user.getPassword(),
-                user.getPassword(),
-                user.getActiveUser());
-
+        UserRequest request = UserMapper.INSTANCE.toUserRequest(user);
         UserResponse response = client.create(request);
-
-        return new UserDomain(response.id(), response.name(), response.password(),
-                response.username(), response.email(),  response.activeUser());
+        return UserMapper.INSTANCE.toUserDomain(response);
     }
 
     @Override
     public Optional<UserDomain> getUserByUsername(String username) {
         UserResponse response = client.getUserByUsername(username);
-
-        return Optional.of(new UserDomain(
-                response.id(),
-                response.username(),
-                response.name(),
-                response.password(),
-                response.email(),
-                response.activeUser()));
+        return Optional.of(UserMapper.INSTANCE.toUserDomain(response));
     }
 }

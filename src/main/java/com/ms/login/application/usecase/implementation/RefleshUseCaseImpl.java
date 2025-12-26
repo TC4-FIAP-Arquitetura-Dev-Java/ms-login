@@ -1,6 +1,6 @@
 package com.ms.login.application.usecase.implementation;
 
-import com.ms.login.application.gateway.LoginGateway;
+import com.ms.login.application.port.out.UserGateway;
 import com.ms.login.application.usecase.RefreshTokenUseCase;
 import com.ms.login.application.usecase.SessionTokenUseCase;
 import com.ms.login.domain.model.AuthTokenDomain;
@@ -16,12 +16,12 @@ import java.util.Date;
 public class RefleshUseCaseImpl implements RefreshTokenUseCase {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final LoginGateway loginGateway;
+    private final UserGateway userGateway;
     private final SessionTokenUseCase sessionTokenUseCase;
 
-    public RefleshUseCaseImpl(JwtTokenProvider jwtTokenProvider, LoginGateway loginGateway, SessionTokenUseCase sessionTokenUseCase) {
+    public RefleshUseCaseImpl(JwtTokenProvider jwtTokenProvider, UserGateway userGateway, SessionTokenUseCase sessionTokenUseCase) {
         this.jwtTokenProvider = jwtTokenProvider;
-        this.loginGateway = loginGateway;
+        this.userGateway = userGateway;
         this.sessionTokenUseCase = sessionTokenUseCase;
     }
 
@@ -32,7 +32,7 @@ public class RefleshUseCaseImpl implements RefreshTokenUseCase {
             TokenInfoDomain info = sessionTokenUseCase.validateRefreshToken(refreshToken);
 
             // Busca o usuário
-            var user = loginGateway.getUsername(info.getUsername())
+            var user = userGateway.getUserByUsername(info.getUsername())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
             // Rotaciona refresh token

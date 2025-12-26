@@ -1,114 +1,71 @@
 package com.ms.login.application.usecase.implementation;
 
-import com.ms.login.application.gateway.LoginGateway;
-import com.ms.login.application.gateway.SecretKeyGenerator;
 import com.ms.login.application.port.out.UserGateway;
-import com.ms.login.domain.domainService.LoginDomainService;
-import com.ms.login.domain.exceptions.CredentialLoginAlreadyExistsException;
-import com.ms.login.domain.model.LoginDomain;
 import com.ms.login.domain.model.UserDomain;
-import com.ms.login.mocks.LoginMock;
 import com.ms.login.mocks.UserMock;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.mockito.MockitoAnnotations;
 
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class RegisterUserUseCaseImplTest {
-
-    @InjectMocks
-    private RegisterUserUseCaseImpl useCase;
 
     @Mock
     private UserGateway userGateway;
 
-    @Mock
-    private LoginDomainService loginDomainService;
+    @InjectMocks
+    private RegisterUserUseCaseImpl registerUserUseCase;
 
-    @Mock
-    private SecretKeyGenerator secretKeyGenerator;
-
-    @AfterEach
-    void tearDown() {
-        SecurityContextHolder.clearContext();
+    @BeforeEach
+    void setup() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void shouldRegisterNewLoginSuccessfully() {
-        var authentication = new TestingAuthenticationToken("user", "jwt-token");
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    void shouldRegisterUserSuccessfully() {
 
-        UserDomain domain = UserMock.getUserDomain();
-        String originalPassword = domain.getPassword();
-        String originalUsername = domain.getUsername();
+        UserDomain user = UserMock.getUserDomain();
 
-        // mocks
-        doNothing().when(loginDomainService).checkExistsUsername(originalUsername);
-        when(secretKeyGenerator.encode(originalPassword)).thenReturn("encodedPassword");
-        doNothing().when(userGateway).createUser(any(UserDomain.class));
+        when(userGateway.createUser(any(UserDomain.class))).thenReturn(user);
 
-        // *** CHAMADA QUE FALTAVA ***
-        useCase.register(domain);
+        UserDomain result = registerUserUseCase.register(user);
 
-        // verificações
-        verify(loginDomainService).checkExistsUsername(originalUsername);
-        verify(secretKeyGenerator).encode(originalPassword);
-        verify(userGateway).createUser(any(UserDomain.class));
-        assertThat(domain.getUsername()).isEqualTo(originalUsername.toLowerCase());
-        assertThat(domain.getPassword()).isEqualTo("encodedPassword");
+        assertNotNull(result);
+        assertEquals("usernameTest", result.getUsername());
+        assertEquals("user@test.com", result.getEmail());
+        assertEquals("passwordTest", result.getPassword());
+
+        verify(userGateway, times(1)).createUser(any(UserDomain.class));
     }
 
     @Test
-    void shouldThrowExceptionWhenUsernameAlreadyExists() {
-        // given
-        var authentication = new TestingAuthenticationToken("user", "jwt-token");
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    void shouldThrowExceptionWhenGatewayFails() {
+        UserDomain user = UserMock.getUserDomain();
 
-        LoginDomain domain = LoginMock.getLoginDomain();
+        when(userGateway.createUser(user))
+                .thenThrow(new RuntimeException("Database error"));
 
-        // when
-        doThrow(new CredentialLoginAlreadyExistsException("Usuário já cadastrado"))
-                .when(loginDomainService)
-                .checkExistsUsername(domain.getUsername());
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> registerUserUseCase.register(user));
 
-        // then
-//        assertThrows(CredentialLoginAlreadyExistsException.class, () -> useCase.register(domain));
-        verify(loginDomainService).checkExistsUsername(domain.getUsername());
-        verifyNoInteractions(userGateway);
-        verifyNoInteractions(secretKeyGenerator);
+        assertEquals("Database error", exception.getMessage());
+        verify(userGateway, times(1)).createUser(user);
     }
 
     @Test
-    void shouldEncodePasswordAndLowercaseUsername() {
-        // given
-        var authentication = new TestingAuthenticationToken("user", "jwt-token");
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    void shouldNotReturnNull() {
+        UserDomain user = UserMock.getUserDomain();
 
-        LoginDomain domain = LoginMock.getLoginDomain();
-        domain.setUsername("TestUser");
-        domain.setPassword("plainPassword");
+        when(userGateway.createUser(any(UserDomain.class))).thenReturn(user);
 
-        // when
-        doNothing().when(loginDomainService).checkExistsUsername(anyString());
-        doNothing().when(userGateway).createUser(any(UserDomain.class));
-        when(secretKeyGenerator.encode("plainPassword")).thenReturn("encodedPassword");
+        UserDomain result = registerUserUseCase.register(user);
 
-//        useCase.register(domain);
-
-        // then
-        assertThat(domain.getUsername()).isEqualTo("testuser");
-        assertThat(domain.getPassword()).isEqualTo("encodedPassword");
-        verify(secretKeyGenerator).encode("plainPassword");
+        assertNotNull(result);
+        verify(userGateway).createUser(user);
     }
 }

@@ -16,25 +16,4 @@ public class RegisterUserUseCaseImpl implements RegisterUserUseCase {
     public UserDomain register(UserDomain userDomain) {
         return userGateway.createUser(userDomain);
     }
-
-    //    private final LoginGateway loginGateway;
-//    private final LoginDomainService loginDomainService;
-//    private final SecretKeyGenerator secretKeyGenerator;
-//
-//    public RegisterUserUseCaseImpl(LoginGateway loginGateway,
-//                                   LoginDomainService loginDomainService,
-//                                   SecretKeyGenerator secretKeyGenerator) {
-//        this.loginGateway = loginGateway;
-//        this.loginDomainService = loginDomainService;
-//        this.secretKeyGenerator = secretKeyGenerator;
-//    }
-//
-//    @Override
-//    public void register(LoginDomain loginDomain) {
-//        RequiredFieldsRule.checkRequiredFields(loginDomain);
-//        loginDomainService.checkExistsUsername(loginDomain.getUsername());
-//        loginDomain.setUsername(loginDomain.getUsername().toLowerCase());
-//        loginDomain.setPassword(secretKeyGenerator.encode(loginDomain.getPassword()));
-//        loginGateway.register(loginDomain);
-//    }
 }

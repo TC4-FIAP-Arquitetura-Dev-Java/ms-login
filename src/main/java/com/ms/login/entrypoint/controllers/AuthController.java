@@ -1,12 +1,12 @@
 package com.ms.login.entrypoint.controllers;
 
-import com.fasterxml.jackson.databind.DatabindException;
-import com.ms.login.application.usecase.CreateLoginUseCase;
+import com.ms.login.application.usecase.RegisterUserUseCase;
 import com.ms.login.application.usecase.LoginUseCase;
 import com.ms.login.application.usecase.LogoutUseCase;
 import com.ms.login.application.usecase.RefreshTokenUseCase;
+import com.ms.login.domain.enums.RoleEnum;
 import com.ms.login.domain.model.AuthTokenDomain;
-import com.ms.login.domain.model.LoginDomain;
+import com.ms.login.domain.model.UserDomain;
 import com.ms.login.entrypoint.controllers.presenter.AuthPresenter;
 import com.ms.loginDomain.AutenticaoApi;
 import com.ms.loginDomain.gen.model.*;
@@ -21,24 +21,28 @@ import java.time.OffsetDateTime;
 public class AuthController implements AutenticaoApi {
 
     private final LoginUseCase loginUseCase;
-    private final CreateLoginUseCase createLoginUseCase;
+    private final RegisterUserUseCase registerUserUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
     private final LogoutUseCase logoutUseCase;
 
     public AuthController(LoginUseCase loginUseCase,
-                          CreateLoginUseCase createLoginUseCase,
+                          RegisterUserUseCase registerUserUseCase,
                           RefreshTokenUseCase refreshTokenUseCase,
                           LogoutUseCase logoutUseCase) {
         this.loginUseCase = loginUseCase;
-        this.createLoginUseCase = createLoginUseCase;
+        this.registerUserUseCase = registerUserUseCase;
         this.refreshTokenUseCase = refreshTokenUseCase;
         this.logoutUseCase = logoutUseCase;
     }
 
     @Override
     public ResponseEntity<RegisterResponseDto> _register(RegisterRequestDto registerRequestDto) {
-        LoginDomain loginDomain = AuthPresenter.toLoginDomain(registerRequestDto);
-        createLoginUseCase.register(loginDomain);
+
+        //TODO: VERificar se isso vai continuar ou não nesse negocio
+        UserDomain user = new UserDomain(null, null,registerRequestDto.getPassword(), registerRequestDto.getUsername(),
+                null, null, RoleEnum.USER);
+
+        UserDomain created = registerUserUseCase.register(user);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

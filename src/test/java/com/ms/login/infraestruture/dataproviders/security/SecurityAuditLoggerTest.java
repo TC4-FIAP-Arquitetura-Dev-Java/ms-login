@@ -28,138 +28,114 @@ class SecurityAuditLoggerTest {
                 .thenReturn("{\"event\":\"TEST\"}");
     }
 
+    // ========== SUCESSO ==========
+
     @Test
-    void logLoginAttempt_shouldCallObjectMapper() throws JsonProcessingException {
+    void shouldLogLoginAttempt() throws JsonProcessingException {
         auditLogger.logLoginAttempt("testuser", "192.168.1.1", true, "Success");
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logLoginAttempt_shouldLogFailure() throws JsonProcessingException {
+    void shouldLogLoginFailure() throws JsonProcessingException {
         auditLogger.logLoginAttempt("testuser", "192.168.1.1", false, "Invalid credentials");
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logPasswordChange_shouldLogEvent() throws JsonProcessingException {
+    void shouldLogPasswordChange() throws JsonProcessingException {
         auditLogger.logPasswordChange("testuser", "192.168.1.1");
-
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logUserCreation_shouldLogEvent() throws JsonProcessingException {
+    void shouldLogUserCreation() throws JsonProcessingException {
         auditLogger.logUserCreation("newuser", "admin", "192.168.1.1");
-
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logUserDeletion_shouldLogEvent() throws JsonProcessingException {
+    void shouldLogUserDeletion() throws JsonProcessingException {
         auditLogger.logUserDeletion("deleteduser", "admin", "192.168.1.1");
-
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logAccessDenied_shouldLogEvent() throws JsonProcessingException {
+    void shouldLogAccessDenied() throws JsonProcessingException {
         auditLogger.logAccessDenied("testuser", "/api/admin", "192.168.1.1", "Insufficient privileges");
-
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logTokenRefresh_shouldLogSuccess() throws JsonProcessingException {
+    void shouldLogTokenRefreshSuccess() throws JsonProcessingException {
         auditLogger.logTokenRefresh("testuser", "192.168.1.1", true);
-
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logTokenRefresh_shouldLogFailure() throws JsonProcessingException {
+    void shouldLogTokenRefreshFailure() throws JsonProcessingException {
         auditLogger.logTokenRefresh("testuser", "192.168.1.1", false);
-
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logSuspiciousActivity_shouldLogEvent() throws JsonProcessingException {
+    void shouldLogSuspiciousActivity() throws JsonProcessingException {
         auditLogger.logSuspiciousActivity("testuser", "192.168.1.1", "Multiple failed logins", "5 attempts in 1 minute");
-
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
-    @Test
-    void logLoginAttempt_shouldHandleException_whenObjectMapperFails() throws Exception {
-        // Arrange: simula falha do ObjectMapper
+    // ========== EXCEÇÕES (Map falhando) ==========
+    private void mockObjectMapperFailure() throws JsonProcessingException {
         when(objectMapper.writeValueAsString(any()))
                 .thenThrow(new JsonProcessingException("Error") {});
+    }
 
-        // Act: executa o método real
+    @Test
+    void shouldHandleExceptionOnLoginAttempt() throws Exception {
+        mockObjectMapperFailure();
         auditLogger.logLoginAttempt("testuser", "192.168.1.1", true, "Success");
-
-        // Assert: garante que ObjectMapper foi chamado
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logPasswordChange_shouldHandleException_whenObjectMapperFails() throws Exception {
-        when(objectMapper.writeValueAsString(any()))
-                .thenThrow(new JsonProcessingException("Error") {});
-
+    void shouldHandleExceptionOnPasswordChange() throws Exception {
+        mockObjectMapperFailure();
         auditLogger.logPasswordChange("testuser", "192.168.1.1");
-
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logUserCreation_shouldHandleException_whenObjectMapperFails() throws Exception {
-        when(objectMapper.writeValueAsString(any()))
-                .thenThrow(new JsonProcessingException("Error") {});
-
+    void shouldHandleExceptionOnUserCreation() throws Exception {
+        mockObjectMapperFailure();
         auditLogger.logUserCreation("newuser", "admin", "192.168.1.1");
-
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logUserDeletion_shouldHandleException_whenObjectMapperFails() throws Exception {
-        when(objectMapper.writeValueAsString(any()))
-                .thenThrow(new JsonProcessingException("Error") {});
-
+    void shouldHandleExceptionOnUserDeletion() throws Exception {
+        mockObjectMapperFailure();
         auditLogger.logUserDeletion("deleteduser", "admin", "192.168.1.1");
-
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logAccessDenied_shouldHandleException_whenObjectMapperFails() throws Exception {
-        when(objectMapper.writeValueAsString(any()))
-                .thenThrow(new JsonProcessingException("Error") {});
-
+    void shouldHandleExceptionOnAccessDenied() throws Exception {
+        mockObjectMapperFailure();
         auditLogger.logAccessDenied("testuser", "/api/admin", "192.168.1.1", "Insufficient privileges");
-
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logTokenRefresh_shouldHandleException_whenObjectMapperFails() throws Exception {
-        when(objectMapper.writeValueAsString(any()))
-                .thenThrow(new JsonProcessingException("Error") {});
-
+    void shouldHandleExceptionOnTokenRefresh() throws Exception {
+        mockObjectMapperFailure();
         auditLogger.logTokenRefresh("testuser", "192.168.1.1", true);
-
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 
     @Test
-    void logSuspiciousActivity_shouldHandleException_whenObjectMapperFails() throws Exception {
-        when(objectMapper.writeValueAsString(any()))
-                .thenThrow(new JsonProcessingException("Error") {});
-
+    void shouldHandleExceptionOnSuspiciousActivity() throws Exception {
+        mockObjectMapperFailure();
         auditLogger.logSuspiciousActivity("testuser", "192.168.1.1", "Multiple failed logins", "5 attempts in 1 minute");
-
-        verify(objectMapper, atLeastOnce()).writeValueAsString(any());
+        verify(objectMapper).writeValueAsString(any());
     }
 }
-

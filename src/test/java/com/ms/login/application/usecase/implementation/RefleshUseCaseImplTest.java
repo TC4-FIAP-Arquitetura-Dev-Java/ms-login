@@ -1,13 +1,13 @@
 package com.ms.login.application.usecase.implementation;
 
-import com.ms.login.application.gateway.LoginGateway;
+import com.ms.login.application.port.out.UserGateway;
 import com.ms.login.application.usecase.SessionTokenUseCase;
 import com.ms.login.domain.enums.RoleEnum;
 import com.ms.login.domain.model.AuthTokenDomain;
-import com.ms.login.domain.model.LoginDomain;
 import com.ms.login.domain.model.TokenInfoDomain;
+import com.ms.login.domain.model.UserDomain;
 import com.ms.login.infrastructure.security.JwtTokenProvider;
-import com.ms.login.mocks.LoginMock;
+import com.ms.login.mocks.UserMock;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ class RefleshUseCaseImplTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @Mock
-    private LoginGateway loginGateway;
+    private UserGateway userGateway;
 
     @Mock
     private SessionTokenUseCase sessionTokenUseCase;
@@ -45,13 +45,13 @@ class RefleshUseCaseImplTest {
 
     private String refreshToken;
     private TokenInfoDomain tokenInfo;
-    private LoginDomain loginDomain;
+    private UserDomain userDomain;
 
     @BeforeEach
     void setUp() {
         refreshToken = "refresh-token-123";
         tokenInfo = new TokenInfoDomain("1L", "username", LocalDateTime.now().plusDays(7));
-        loginDomain = LoginMock.getLoginDomain();
+        userDomain = UserMock.getUserDomain();
     }
 
     @Test
@@ -64,7 +64,7 @@ class RefleshUseCaseImplTest {
 
         // when
         when(sessionTokenUseCase.validateRefreshToken(refreshToken)).thenReturn(tokenInfo);
-        when(loginGateway.getUsername(tokenInfo.getUsername())).thenReturn(Optional.of(loginDomain));
+        when(userGateway.getUserByUsername(tokenInfo.getUsername())).thenReturn(Optional.of(userDomain));
         doNothing().when(sessionTokenUseCase).revokeRefreshToken(refreshToken);
         when(sessionTokenUseCase.generateRefreshToken(tokenInfo.getUserId(), tokenInfo.getUsername()))
                 .thenReturn(newRefreshToken);
@@ -79,15 +79,15 @@ class RefleshUseCaseImplTest {
         assertThat(result).isNotNull();
         assertThat(result.getAccessToken()).isEqualTo(newAccessToken);
         assertThat(result.getRefreshToken()).isEqualTo(newRefreshToken);
-        assertThat(result.getUsername()).isEqualTo(loginDomain.getUsername());
-        assertThat(result.getUserId()).isEqualTo(loginDomain.getUserId());
-        assertThat(result.getRoleEnum()).isEqualTo(loginDomain.getRoleEnum().name());
+        assertThat(result.getUsername()).isEqualTo(userDomain.getUsername());
+        assertThat(result.getUserId()).isEqualTo(userDomain.getUserId());
+        assertThat(result.getRoleEnum()).isEqualTo(userDomain.getRoleEnum().name());
 
         verify(sessionTokenUseCase).validateRefreshToken(refreshToken);
-        verify(loginGateway).getUsername(tokenInfo.getUsername());
+        verify(userGateway).getUserByUsername(tokenInfo.getUsername());
         verify(sessionTokenUseCase).revokeRefreshToken(refreshToken);
         verify(sessionTokenUseCase).generateRefreshToken(tokenInfo.getUserId(), tokenInfo.getUsername());
-        verify(jwtTokenProvider).generateAccessToken(loginDomain.getUsername(), loginDomain.getUserId(), loginDomain.getRoleEnum());
+        verify(jwtTokenProvider).generateAccessToken(userDomain.getUsername(), userDomain.getUserId(), userDomain.getRoleEnum());
     }
 
     @Test
@@ -100,21 +100,21 @@ class RefleshUseCaseImplTest {
         assertThrows(BadCredentialsException.class, () -> refreshUseCase.refreshToken(refreshToken));
 
         verify(sessionTokenUseCase).validateRefreshToken(refreshToken);
-        verifyNoInteractions(loginGateway);
+        verifyNoInteractions(userGateway);
     }
 
     @Test
     void shouldThrowExceptionWhenUserNotFound() {
         // given
         when(sessionTokenUseCase.validateRefreshToken(refreshToken)).thenReturn(tokenInfo);
-        when(loginGateway.getUsername(tokenInfo.getUsername())).thenReturn(Optional.empty());
+        when(userGateway.getUserByUsername(tokenInfo.getUsername())).thenReturn(Optional.empty());
 
         // when & then
         // O RefleshUseCaseImpl captura todas as exceções e transforma em BadCredentialsException
         assertThrows(BadCredentialsException.class, () -> refreshUseCase.refreshToken(refreshToken));
 
         verify(sessionTokenUseCase).validateRefreshToken(refreshToken);
-        verify(loginGateway).getUsername(tokenInfo.getUsername());
+        verify(userGateway).getUserByUsername(tokenInfo.getUsername());
         verify(sessionTokenUseCase, never()).revokeRefreshToken(anyString());
     }
 
@@ -128,7 +128,7 @@ class RefleshUseCaseImplTest {
         assertThrows(BadCredentialsException.class, () -> refreshUseCase.refreshToken(refreshToken));
 
         verify(sessionTokenUseCase).validateRefreshToken(refreshToken);
-        verifyNoInteractions(loginGateway);
+        verifyNoInteractions(userGateway);
     }
 
     private Claims createMockClaims() {

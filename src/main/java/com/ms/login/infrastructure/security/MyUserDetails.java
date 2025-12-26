@@ -1,7 +1,7 @@
 package com.ms.login.infrastructure.security;
 
 import com.ms.login.domain.enums.RoleEnum;
-import com.ms.login.infrastructure.database.entities.LoginDocument;
+import com.ms.login.domain.model.UserDomain;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,7 +18,7 @@ public class MyUserDetails implements UserDetails {
 
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public MyUserDetails(LoginDocument usuario) {
+    public MyUserDetails(UserDomain usuario) {
         this.userId = usuario.getUserId();
         this.username = usuario.getUsername();
         this.password = usuario.getPassword();

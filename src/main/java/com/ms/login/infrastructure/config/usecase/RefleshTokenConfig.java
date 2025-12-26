@@ -1,6 +1,6 @@
 package com.ms.login.infrastructure.config.usecase;
 
-import com.ms.login.application.gateway.LoginGateway;
+import com.ms.login.application.port.out.UserGateway;
 import com.ms.login.application.usecase.SessionTokenUseCase;
 import com.ms.login.application.usecase.implementation.RefleshUseCaseImpl;
 import com.ms.login.infrastructure.security.JwtTokenProvider;
@@ -12,8 +12,8 @@ public class RefleshTokenConfig {
 
     @Bean
     public RefleshUseCaseImpl refreshTokenUseCase(JwtTokenProvider jwtTokenProvider,
-                                                  LoginGateway loginGateway,
+                                                  UserGateway userGateway,
                                                   SessionTokenUseCase sessionTokenUseCase) {
-        return new RefleshUseCaseImpl(jwtTokenProvider, loginGateway, sessionTokenUseCase);
+        return new RefleshUseCaseImpl(jwtTokenProvider, userGateway, sessionTokenUseCase);
     }
 }

@@ -7,9 +7,13 @@ import com.ms.login.application.usecase.RegisterUserUseCase;
 import com.ms.login.domain.enums.RoleEnum;
 import com.ms.login.domain.model.AuthTokenDomain;
 import com.ms.login.domain.model.UserDomain;
+import com.ms.login.infrastructure.client.dto.UserRequest;
+import com.ms.login.infrastructure.client.mapper.UserMapper;
+import com.ms.login.mocks.UserMock;
 import com.ms.loginDomain.gen.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.http.ResponseEntity;
 
 import java.time.OffsetDateTime;
@@ -25,6 +29,7 @@ class AuthControllerTest {
     private RefreshTokenUseCase refreshTokenUseCase;
     private LogoutUseCase logoutUseCase;
     private AuthController controller;
+    private UserMapper userMapper;
 
     @BeforeEach
     void setup() {
@@ -32,29 +37,41 @@ class AuthControllerTest {
         registerUserUseCase = mock(RegisterUserUseCase.class);
         refreshTokenUseCase = mock(RefreshTokenUseCase.class);
         logoutUseCase = mock(LogoutUseCase.class);
+        userMapper = mock(UserMapper.class);
 
-        controller = new AuthController(loginUseCase, registerUserUseCase, refreshTokenUseCase, logoutUseCase);
+        controller = new AuthController(loginUseCase, registerUserUseCase, refreshTokenUseCase, logoutUseCase, userMapper);
     }
 
     // -------------------- REGISTER --------------------
-
     @Test
     void testRegister_success() {
         RegisterRequestDto request = new RegisterRequestDto();
-        request.setUsername("gustavo");
-        request.setPassword("123");
+        request.setUsername("usernameTest");
+        request.setPassword("passwordTest");
 
-        when(registerUserUseCase.register(any(UserDomain.class)))
-                .thenReturn(new UserDomain("1","gustavo","123","gustavo",null,null, RoleEnum.USER));
+        UserRequest mappedUserRequest = UserMock.getUserRequest();
+
+        // Mock do mapper
+        when(userMapper.toUserRequestDto(any(RegisterRequestDto.class)))
+                .thenReturn(mappedUserRequest);
+
+        // register é void, então usamos doNothing()
+        doNothing().when(registerUserUseCase).register(any(UserRequest.class));
 
         ResponseEntity<RegisterResponseDto> response = controller._register(request);
 
+        // Verificações
         assertEquals(201, response.getStatusCodeValue());
-        verify(registerUserUseCase, times(1)).register(any(UserDomain.class));
+        verify(registerUserUseCase, times(1)).register(mappedUserRequest);
+
+        // Verifica argumentos usando ArgumentCaptor
+        ArgumentCaptor<UserRequest> captor = ArgumentCaptor.forClass(UserRequest.class);
+        verify(registerUserUseCase).register(captor.capture());
+        assertEquals("usernameTest", captor.getValue().username());
+        assertEquals("passwordTest", captor.getValue().password());
     }
 
     // -------------------- LOGIN --------------------
-
     @Test
     void testLogin_success() {
         LoginRequestDto request = new LoginRequestDto();
@@ -73,7 +90,6 @@ class AuthControllerTest {
     }
 
     // -------------------- REFRESH TOKEN --------------------
-
     @Test
     void testRefreshToken_success() {
         RefreshTokenRequestDto request = new RefreshTokenRequestDto();
@@ -91,11 +107,12 @@ class AuthControllerTest {
     }
 
     // -------------------- LOGOUT --------------------
-
     @Test
     void testLogout_success() {
         LogoutRequestDto request = new LogoutRequestDto();
         request.setRefreshToken("logoutToken");
+
+        doNothing().when(logoutUseCase).logoutLogin("logoutToken");
 
         ResponseEntity<LogoutResponseDto> response = controller._logout(request);
 

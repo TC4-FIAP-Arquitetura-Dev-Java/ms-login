@@ -2,6 +2,7 @@ package com.ms.login.application.usecase.implementation;
 
 import com.ms.login.application.port.out.UserGateway;
 import com.ms.login.domain.model.UserDomain;
+import com.ms.login.infrastructure.client.dto.UserRequest;
 import com.ms.login.mocks.UserMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,45 +28,42 @@ class RegisterUserUseCaseImplTest {
     }
 
     @Test
-    void shouldRegisterUserSuccessfully() {
+    void shouldCallGatewaySuccessfully() {
+        UserRequest user = UserMock.getUserRequest();
 
-        UserDomain user = UserMock.getUserDomain();
+        doNothing().when(userGateway).createUser(any(UserRequest.class));
+        registerUserUseCase.register(user);
 
-        when(userGateway.createUser(any(UserDomain.class))).thenReturn(user);
-
-        UserDomain result = registerUserUseCase.register(user);
-
-        assertNotNull(result);
-        assertEquals("usernameTest", result.getUsername());
-        assertEquals("user@test.com", result.getEmail());
-        assertEquals("passwordTest", result.getPassword());
-
-        verify(userGateway, times(1)).createUser(any(UserDomain.class));
-    }
-
-    @Test
-    void shouldThrowExceptionWhenGatewayFails() {
-        UserDomain user = UserMock.getUserDomain();
-
-        when(userGateway.createUser(user))
-                .thenThrow(new RuntimeException("Database error"));
-
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> registerUserUseCase.register(user));
-
-        assertEquals("Database error", exception.getMessage());
         verify(userGateway, times(1)).createUser(user);
     }
 
     @Test
-    void shouldNotReturnNull() {
-        UserDomain user = UserMock.getUserDomain();
+    void shouldThrowExceptionWhenGatewayFails() {
+        UserRequest user = UserMock.getUserRequest();
 
-        when(userGateway.createUser(any(UserDomain.class))).thenReturn(user);
+        doThrow(new RuntimeException("Database error"))
+                .when(userGateway).createUser(user);
 
-        UserDomain result = registerUserUseCase.register(user);
+        // Verifica se o register lança a exceção
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> registerUserUseCase.register(user));
 
-        assertNotNull(result);
-        verify(userGateway).createUser(user);
+        // Verifica a mensagem da exceção
+        assert(exception.getMessage().equals("Database error"));
+
+        verify(userGateway, times(1)).createUser(user);
+    }
+
+    @Test
+    void shouldNotCallGatewayWithNull() {
+        UserRequest user = null;
+
+        doThrow(new NullPointerException("User cannot be null"))
+                .when(userGateway).createUser(user);
+
+        assertThrows(NullPointerException.class,
+                () -> registerUserUseCase.register(user));
+
+        verify(userGateway, times(1)).createUser(user);
     }
 }

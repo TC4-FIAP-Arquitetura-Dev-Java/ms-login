@@ -1,141 +1,145 @@
 package com.ms.login.domain.rules;
 
-import com.ms.login.domain.enums.RoleEnum;
-import com.ms.login.domain.model.LoginDomain;
+import com.ms.login.domain.exceptions.FieldRequiredException;
+import com.ms.login.infrastructure.client.dto.RoleEnumDto;
+import com.ms.login.infrastructure.client.dto.UserRequest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class RequiredFieldsRuleTest {
 
+    // -------------------- TODOS OS CAMPOS PRESENTES --------------------
     @Test
     void shouldNotThrowExceptionWhenAllFieldsArePresent() {
-        // given
-        LoginDomain loginDomain = new LoginDomain();
-        loginDomain.setUserId("1L");
-        loginDomain.setUsername("testuser");
-        loginDomain.setPassword("password123");
-        loginDomain.setRoleEnum(RoleEnum.USER);
+        UserRequest request = new UserRequest(
+                "testuser",      // username
+                "John Doe",      // name
+                "password123",   // password
+                "user@test.com", // email
+                RoleEnumDto.USER,// roleEnum
+                true             // activeUser
+        );
 
-        // when & then
-        assertDoesNotThrow(() -> RequiredFieldsRule.checkRequiredFields(loginDomain));
+        assertDoesNotThrow(() -> RequiredFieldsRule.checkRequiredFields(request));
+    }
+
+    // -------------------- CAMPOS NULOS --------------------
+    @Test
+    void shouldThrowExceptionWhenSomeFieldsAreNull() {
+        UserRequest request = new UserRequest(
+                null,            // username
+                null,            // name
+                null,            // password
+                null,            // email
+                RoleEnumDto.USER,// roleEnum
+                true
+        );
+
+        assertThrows(FieldRequiredException.class, () -> RequiredFieldsRule.checkRequiredFields(request));
+    }
+
+    // -------------------- CAMPOS VAZIOS --------------------
+    @Test
+    void shouldThrowExceptionWhenSomeFieldsAreEmpty() {
+        UserRequest request = new UserRequest(
+                "",              // username
+                "",              // name
+                "",              // password
+                "",              // email
+                RoleEnumDto.ADMIN,// roleEnum
+                true
+        );
+
+        assertThrows(FieldRequiredException.class, () -> RequiredFieldsRule.checkRequiredFields(request));
+    }
+
+    // -------------------- CAMPOS COM ESPAÇOS --------------------
+    @Test
+    void shouldThrowExceptionWhenFieldsHaveWhitespace() {
+        UserRequest request = new UserRequest(
+                "   ",           // username
+                "   ",           // name
+                "   ",           // password
+                "   ",           // email
+                RoleEnumDto.USER,// roleEnum
+                true
+        );
+
+        assertThrows(FieldRequiredException.class, () -> RequiredFieldsRule.checkRequiredFields(request));
+    }
+
+    // -------------------- TESTES DE CAMPOS INDIVIDUAIS --------------------
+    @Test
+    void shouldThrowExceptionWhenOnlyUsernameIsNull() {
+        UserRequest request = new UserRequest(
+                null,             // username
+                "John Doe",       // name
+                "password123",    // password
+                "user@test.com",  // email
+                RoleEnumDto.USER, // roleEnum
+                true
+        );
+
+        assertThrows(FieldRequiredException.class, () -> RequiredFieldsRule.checkRequiredFields(request));
     }
 
     @Test
-    void shouldNotThrowExceptionWhenSomeFieldsAreNull() {
-        // given
-        LoginDomain loginDomain = new LoginDomain();
-        loginDomain.setUserId(null);
-        loginDomain.setUsername(null);
-        loginDomain.setPassword(null);
-        loginDomain.setRoleEnum(RoleEnum.USER);
+    void shouldThrowExceptionWhenOnlyNameIsNull() {
+        UserRequest request = new UserRequest(
+                "testuser",       // username
+                null,             // name
+                "password123",    // password
+                "user@test.com",  // email
+                RoleEnumDto.USER, // roleEnum
+                true
+        );
 
-        // when & then
-        assertDoesNotThrow(() -> RequiredFieldsRule.checkRequiredFields(loginDomain));
+        assertThrows(FieldRequiredException.class, () -> RequiredFieldsRule.checkRequiredFields(request));
     }
 
     @Test
-    void shouldNotThrowExceptionWhenSomeFieldsAreEmpty() {
-        // given
-        LoginDomain loginDomain = new LoginDomain();
-        loginDomain.setUserId("");
-        loginDomain.setUsername("");
-        loginDomain.setPassword("");
-        loginDomain.setRoleEnum(RoleEnum.ADMIN);
+    void shouldThrowExceptionWhenOnlyPasswordIsNull() {
+        UserRequest request = new UserRequest(
+                "testuser",
+                "John Doe",
+                null,
+                "user@test.com",
+                RoleEnumDto.USER,
+                true
+        );
 
-        // when & then
-        assertDoesNotThrow(() -> RequiredFieldsRule.checkRequiredFields(loginDomain));
+        assertThrows(FieldRequiredException.class, () -> RequiredFieldsRule.checkRequiredFields(request));
     }
 
     @Test
-    void shouldNotThrowExceptionWhenFieldsHaveWhitespace() {
-        // given
-        LoginDomain loginDomain = new LoginDomain();
-        loginDomain.setUserId("   ");
-        loginDomain.setUsername("   ");
-        loginDomain.setPassword("   ");
-        loginDomain.setRoleEnum(RoleEnum.USER);
+    void shouldThrowExceptionWhenOnlyEmailIsNull() {
+        UserRequest request = new UserRequest(
+                "testuser",
+                "John Doe",
+                "password123",
+                null,
+                RoleEnumDto.USER,
+                true
+        );
 
-        // when & then
-        assertDoesNotThrow(() -> RequiredFieldsRule.checkRequiredFields(loginDomain));
+        assertThrows(FieldRequiredException.class, () -> RequiredFieldsRule.checkRequiredFields(request));
     }
 
     @Test
-    void shouldNotThrowExceptionWhenOnlyUserIdIsNull() {
-        // given
-        LoginDomain loginDomain = new LoginDomain();
-        loginDomain.setUserId(null);
-        loginDomain.setUsername("testuser");
-        loginDomain.setPassword("password123");
-        loginDomain.setRoleEnum(RoleEnum.USER);
+    void shouldThrowExceptionWhenOnlyRoleIsNull() {
+        UserRequest request = new UserRequest(
+                "testuser",
+                "John Doe",
+                "password123",
+                "user@test.com",
+                null,
+                true
+        );
 
-        // when & then
-        assertDoesNotThrow(() -> RequiredFieldsRule.checkRequiredFields(loginDomain));
-    }
-
-    @Test
-    void shouldNotThrowExceptionWhenOnlyUsernameIsNull() {
-        // given
-        LoginDomain loginDomain = new LoginDomain();
-        loginDomain.setUserId("1L");
-        loginDomain.setUsername(null);
-        loginDomain.setPassword("password123");
-        loginDomain.setRoleEnum(RoleEnum.USER);
-
-        // when & then
-        assertDoesNotThrow(() -> RequiredFieldsRule.checkRequiredFields(loginDomain));
-    }
-
-    @Test
-    void shouldNotThrowExceptionWhenOnlyPasswordIsNull() {
-        // given
-        LoginDomain loginDomain = new LoginDomain();
-        loginDomain.setUserId("1L");
-        loginDomain.setUsername("testuser");
-        loginDomain.setPassword(null);
-        loginDomain.setRoleEnum(RoleEnum.USER);
-
-        // when & then
-        assertDoesNotThrow(() -> RequiredFieldsRule.checkRequiredFields(loginDomain));
-    }
-
-    @Test
-    void shouldNotThrowExceptionWhenOnlyUserIdIsEmpty() {
-        // given
-        LoginDomain loginDomain = new LoginDomain();
-        loginDomain.setUserId("");
-        loginDomain.setUsername("testuser");
-        loginDomain.setPassword("password123");
-        loginDomain.setRoleEnum(RoleEnum.USER);
-
-        // when & then
-        assertDoesNotThrow(() -> RequiredFieldsRule.checkRequiredFields(loginDomain));
-    }
-
-    @Test
-    void shouldNotThrowExceptionWhenOnlyUsernameIsEmpty() {
-        // given
-        LoginDomain loginDomain = new LoginDomain();
-        loginDomain.setUserId("1L");
-        loginDomain.setUsername("");
-        loginDomain.setPassword("password123");
-        loginDomain.setRoleEnum(RoleEnum.USER);
-
-        // when & then
-        assertDoesNotThrow(() -> RequiredFieldsRule.checkRequiredFields(loginDomain));
-    }
-
-    @Test
-    void shouldNotThrowExceptionWhenOnlyPasswordIsEmpty() {
-        // given
-        LoginDomain loginDomain = new LoginDomain();
-        loginDomain.setUserId("1L");
-        loginDomain.setUsername("testuser");
-        loginDomain.setPassword("");
-        loginDomain.setRoleEnum(RoleEnum.USER);
-
-        // when & then
-        assertDoesNotThrow(() -> RequiredFieldsRule.checkRequiredFields(loginDomain));
+        assertThrows(FieldRequiredException.class, () -> RequiredFieldsRule.checkRequiredFields(request));
     }
 }
+
 

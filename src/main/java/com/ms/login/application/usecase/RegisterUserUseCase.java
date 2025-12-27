@@ -1,8 +1,8 @@
 package com.ms.login.application.usecase;
 
-import com.ms.login.domain.model.UserDomain;
+import com.ms.login.infrastructure.client.dto.UserRequest;
 
 public interface RegisterUserUseCase {
 
-    UserDomain register(UserDomain userDomain);
+    void register(UserRequest userDomain);
 }

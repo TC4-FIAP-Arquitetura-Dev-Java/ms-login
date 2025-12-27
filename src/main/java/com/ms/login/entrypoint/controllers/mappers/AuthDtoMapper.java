@@ -21,6 +21,7 @@ public interface AuthDtoMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(source = "roleEnum", target = "roleEnum", qualifiedByName = "toRoleEnum")
+    @Mapping(target = "userId", ignore = true)
     LoginDomain toLoginDomain(RegisterRequestDto registerRequestDto);
 
     @Mapping(source = "roleEnum", target = "roleEnum", qualifiedByName = "toRoleEnumDto")

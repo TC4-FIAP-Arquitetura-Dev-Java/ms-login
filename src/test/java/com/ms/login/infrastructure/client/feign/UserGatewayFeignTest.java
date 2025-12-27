@@ -28,21 +28,28 @@ class UserGatewayFeignTest {
 
     @Test
     void testCreateUser_success() {
-        UserDomain userDomain = UserMock.getUserDomain();
-        UserResponse response = UserMock.getUserResponse();
+        // Arrange
+        UserRequest userRequest = UserMock.getUserRequest();
+        UserResponse userResponse = UserMock.getUserResponse();
 
-        when(client.create(any(UserRequest.class))).thenReturn(response);
+        // Mock do client para retornar UserResponse
+        when(client.create(any(UserRequest.class))).thenReturn(userResponse);
 
-        UserDomain result = gateway.createUser(userDomain);
+        // Método do gateway é void, então usamos doNothing()
+        doNothing().when(gateway).createUser(any(UserRequest.class));
 
-        assertNotNull(result);
-        assertEquals("usernameTest", result.getUsername());
-        assertEquals("user@test.com", result.getEmail());
+        // Act
+        gateway.createUser(userRequest); // Método void
 
+        // Assert
         ArgumentCaptor<UserRequest> captor = ArgumentCaptor.forClass(UserRequest.class);
         verify(client, times(1)).create(captor.capture());
+        verify(gateway, times(1)).createUser(any(UserRequest.class));
 
-        assertEquals("usernameTest", captor.getValue().username());
+        // Verifica valores enviados ao client
+        UserRequest captured = captor.getValue();
+        assertEquals("usernameTest", captured.username());
+        assertEquals("user@test.com", captured.email());
     }
 
     @Test

@@ -6,6 +6,7 @@ import com.ms.login.infrastructure.client.dto.UserRequest;
 import com.ms.login.infrastructure.client.dto.UserResponse;
 import com.ms.login.infrastructure.client.dto.RoleEnumDto;
 
+import com.ms.loginDomain.gen.model.RegisterRequestDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -22,8 +23,10 @@ public interface UserMapper {
     UserDomain toUserDomain(UserResponse userResponse);
 
     // DOMAIN → REQUEST (interno → Feign)
-    @Mapping(source = "roleEnum", target = "roleEnumDto", qualifiedByName = "domainToDto")
+    @Mapping(source = "roleEnum", target = "roleEnum", qualifiedByName = "domainToDto")
     UserRequest toUserRequest(UserDomain userDomain);
+
+    UserRequest toUserRequestDto(RegisterRequestDto requestDto);
 
     // ================= MAPEAMENTO DO ENUM =================
 

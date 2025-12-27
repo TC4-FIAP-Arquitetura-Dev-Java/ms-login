@@ -4,10 +4,11 @@ import com.ms.login.application.usecase.RegisterUserUseCase;
 import com.ms.login.application.usecase.LoginUseCase;
 import com.ms.login.application.usecase.LogoutUseCase;
 import com.ms.login.application.usecase.RefreshTokenUseCase;
-import com.ms.login.domain.enums.RoleEnum;
 import com.ms.login.domain.model.AuthTokenDomain;
 import com.ms.login.domain.model.UserDomain;
 import com.ms.login.entrypoint.controllers.presenter.AuthPresenter;
+import com.ms.login.infrastructure.client.dto.UserRequest;
+import com.ms.login.infrastructure.client.mapper.UserMapper;
 import com.ms.loginDomain.AutenticaoApi;
 import com.ms.loginDomain.gen.model.*;
 import org.springframework.http.HttpStatus;
@@ -25,24 +26,24 @@ public class AuthController implements AutenticaoApi {
     private final RefreshTokenUseCase refreshTokenUseCase;
     private final LogoutUseCase logoutUseCase;
 
+    private final UserMapper userMapper;
+
     public AuthController(LoginUseCase loginUseCase,
                           RegisterUserUseCase registerUserUseCase,
                           RefreshTokenUseCase refreshTokenUseCase,
-                          LogoutUseCase logoutUseCase) {
+                          LogoutUseCase logoutUseCase,
+                          UserMapper userMapper) {
         this.loginUseCase = loginUseCase;
         this.registerUserUseCase = registerUserUseCase;
         this.refreshTokenUseCase = refreshTokenUseCase;
         this.logoutUseCase = logoutUseCase;
+        this.userMapper = userMapper;
     }
 
     @Override
     public ResponseEntity<RegisterResponseDto> _register(RegisterRequestDto registerRequestDto) {
-
-        //TODO: VERificar se isso vai continuar ou não nesse negocio
-        UserDomain user = new UserDomain(null, null,registerRequestDto.getPassword(), registerRequestDto.getUsername(),
-                null, null, RoleEnum.USER);
-
-        UserDomain created = registerUserUseCase.register(user);
+        UserRequest userRequest = userMapper.toUserRequestDto(registerRequestDto);
+        registerUserUseCase.register(userRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

@@ -12,22 +12,20 @@ import java.util.Optional;
 @Component
 public class UserGatewayFeign implements UserGateway {
 
-    private final UserClientFeign client;
+    private final UserClientFeign UserClientFeign;
 
     public UserGatewayFeign(UserClientFeign client) {
-        this.client = client;
+        this.UserClientFeign = client;
     }
 
     @Override
-    public UserDomain createUser(UserDomain user) {
-        UserRequest request = UserMapper.INSTANCE.toUserRequest(user);
-        UserResponse response = client.create(request);
-        return UserMapper.INSTANCE.toUserDomain(response);
+    public void createUser(UserRequest request) {
+        UserClientFeign.create(request);
     }
 
     @Override
     public Optional<UserDomain> getUserByUsername(String username) {
-        UserResponse response = client.getUserByUsername(username);
+        UserResponse response = UserClientFeign.getUserByUsername(username);
         return Optional.of(UserMapper.INSTANCE.toUserDomain(response));
     }
 }

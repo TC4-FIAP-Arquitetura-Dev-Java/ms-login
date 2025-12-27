@@ -138,23 +138,29 @@ components:
       required:
         - username
         - password
-        - role
+        - name
+        - email
+        - activeUser
       properties:
-        userId:
-          type: string
-          description: ID do usuário (gerado automaticamente)
-          example: 652ff3a9b1c2d40012ab45de
         username:
           type: string
-          description: Nome de usuário para login
-          example: joao.silva
+          example: jdoe
+        name:
+          type: string
+          example: John Doe
         password:
           type: string
-          format: password
-          description: Senha do usuário
-          example: $enh@2025
+          writeOnly: true
+          example: Password@123
+        email:
+          type: string
+          format: email
+          example: john.doe@email.com
         roleEnum:
           $ref: '#/components/schemas/RoleEnum'
+        activeUser:
+          type: boolean
+          example: true
 
     RegisterResponse:
       type: object

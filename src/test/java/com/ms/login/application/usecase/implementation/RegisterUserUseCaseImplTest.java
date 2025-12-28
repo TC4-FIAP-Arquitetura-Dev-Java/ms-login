@@ -2,6 +2,7 @@ package com.ms.login.application.usecase.implementation;
 
 import com.ms.login.application.port.out.UserGateway;
 import com.ms.login.domain.model.UserDomain;
+import com.ms.login.domain.rules.RequiredFieldsRule;
 import com.ms.login.infrastructure.client.dto.UserRequest;
 import com.ms.login.mocks.UserMock;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,9 @@ class RegisterUserUseCaseImplTest {
 
     @Mock
     private UserGateway userGateway;
+
+    @Mock
+    private RequiredFieldsRule requiredFieldsRule;
 
     @InjectMocks
     private RegisterUserUseCaseImpl registerUserUseCase;
@@ -55,15 +59,16 @@ class RegisterUserUseCaseImplTest {
     }
 
     @Test
-    void shouldNotCallGatewayWithNull() {
+    void shouldNotCallGatewayWhenUserIsNull() {
+        // Arrange
         UserRequest user = null;
 
-        doThrow(new NullPointerException("User cannot be null"))
-                .when(userGateway).createUser(user);
-
+        // Act & Assert
         assertThrows(NullPointerException.class,
                 () -> registerUserUseCase.register(user));
 
-        verify(userGateway, times(1)).createUser(user);
+        // Verify - deve garantir que o gateway NÃO foi chamado
+        verify(userGateway, never()).createUser(any());
     }
+
 }

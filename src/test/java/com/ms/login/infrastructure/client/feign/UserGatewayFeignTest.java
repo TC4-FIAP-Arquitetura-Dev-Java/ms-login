@@ -1,6 +1,5 @@
 package com.ms.login.infrastructure.client.feign;
 
-import com.ms.login.application.port.out.UserGateway;
 import com.ms.login.domain.model.UserDomain;
 import com.ms.login.infrastructure.client.dto.UserRequest;
 import com.ms.login.infrastructure.client.dto.UserResponse;
@@ -8,6 +7,9 @@ import com.ms.login.mocks.UserMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 
@@ -17,13 +19,15 @@ import static org.mockito.Mockito.*;
 
 class UserGatewayFeignTest {
 
-    private UserClientFeign client;
-    private UserGateway gateway;
+    @Mock
+    private UserClientFeign client; // Feign client deve ser mock
+
+    @InjectMocks
+    private UserGatewayFeign gateway; // Classe real que queremos testar
 
     @BeforeEach
     void setup() {
-        client = mock(UserClientFeign.class);
-        gateway = new UserGatewayFeign(client);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -32,22 +36,17 @@ class UserGatewayFeignTest {
         UserRequest userRequest = UserMock.getUserRequest();
         UserResponse userResponse = UserMock.getUserResponse();
 
-        // Mock do client para retornar UserResponse
         when(client.create(any(UserRequest.class))).thenReturn(userResponse);
 
-        // Método do gateway é void, então usamos doNothing()
-        doNothing().when(gateway).createUser(any(UserRequest.class));
-
         // Act
-        gateway.createUser(userRequest); // Método void
+        gateway.createUser(userRequest);
 
         // Assert
         ArgumentCaptor<UserRequest> captor = ArgumentCaptor.forClass(UserRequest.class);
-        verify(client, times(1)).create(captor.capture());
-        verify(gateway, times(1)).createUser(any(UserRequest.class));
+        verify(client, times(1)).create(captor.capture()); // verifica chamada no feign
 
-        // Verifica valores enviados ao client
         UserRequest captured = captor.getValue();
+
         assertEquals("usernameTest", captured.username());
         assertEquals("user@test.com", captured.email());
     }

@@ -21,7 +21,7 @@ Para que o MS-Login possa validar credenciais e criar usuários, é necessário 
 Adicione a seguinte propriedade:
 
 ```
-usuario.service.url=http://localhost:9083/ms-usuario/
+usuario.service.url=http://localhost:9082/ms-usuario/
 ```
 
 Essa configuração define o endereço base usado internamente para comunicação entre os microsserviços. 

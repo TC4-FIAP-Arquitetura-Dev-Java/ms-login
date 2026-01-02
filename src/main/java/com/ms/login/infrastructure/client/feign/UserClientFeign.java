@@ -14,6 +14,6 @@ public interface UserClientFeign {
     @PostMapping("/users")
     UserResponse create(@RequestBody UserRequest userRequest);
 
-    @GetMapping("users/username/{username}")
+    @GetMapping("/users/username/{username}")
     UserResponse getUserByUsername(@PathVariable("username") String username);
 }

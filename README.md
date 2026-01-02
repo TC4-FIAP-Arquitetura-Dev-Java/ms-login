@@ -171,7 +171,7 @@ Exemplo de erro:
 
 ## 🔥 Como rodar o projeto
 
-1. Start **MS-Usuario** → Porta recomendada: `9083`
+1. Start **MS-Usuario** → Porta recomendada: `9082`
 2. Configure no MS-Login a URL Feign
 3. Start **MS-Login**
 4. Teste via Swagger em:  
